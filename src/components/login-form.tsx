@@ -26,7 +26,7 @@ export function LoginForm({
                     <form onSubmit={handleSubmit}>
                         <div className="grid gap-6">
                             <div className="flex flex-col gap-4">
-                                <Button variant="outline" className="w-full"
+                                <Button variant="outline" type="button" className="w-full"
                                         onClick={(event) => handleOAuth2Login(event, "apple")}>
                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
                                         <path
@@ -36,7 +36,7 @@ export function LoginForm({
                                     </svg>
                                     Login with Apple
                                 </Button>
-                                <Button variant="outline" className="w-full"
+                                <Button variant="outline" type="button" className="w-full"
                                         onClick={(event) => handleOAuth2Login(event, "google")}>
                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
                                         <path

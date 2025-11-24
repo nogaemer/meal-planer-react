@@ -10,7 +10,7 @@ import {cn} from "@/lib/utils.ts";
 import {Skeleton} from "@/components/ui/skeleton.tsx";
 
 interface RatingComponentProps {
-    mealId: string;
+    mealId: string | null;
 }
 
 const RatingCard: React.FC<RatingComponentProps & React.HTMLProps<HTMLDivElement>> = ({
@@ -28,7 +28,7 @@ const RatingCard: React.FC<RatingComponentProps & React.HTMLProps<HTMLDivElement
     useEffect(() => {
         if (mealId) {
             fetchRatings();
-        }
+        } else setIsLoading(true);
     }, [mealId]);
 
     const fetchRatings = async (updateLoading: boolean = true): Promise<void> => {
@@ -56,7 +56,7 @@ const RatingCard: React.FC<RatingComponentProps & React.HTMLProps<HTMLDivElement
     };
 
     const submitRating = async (newRating: number): Promise<void> => {
-        if (!isAuthenticated || !user) return;
+        if (!isAuthenticated || !user || !mealId) return;
 
         setIsSubmitting(true);
         try {
@@ -83,36 +83,38 @@ const RatingCard: React.FC<RatingComponentProps & React.HTMLProps<HTMLDivElement
         }
     };
 
-    if (loading) return (
-        <Card className={cn("py-5 px-5 pt-10 rounded-4xl", className)} {...props}>
-            <Skeleton className="min-h-6"/>
-            <Separator/>
-            <Skeleton className="min-h-14 rounded-2xl"/>
-            <Separator/>
-            <div className="flex flex-col gap-0.5 overflow-scroll">
-                <Skeleton className="min-h-14 rounded-b-md rounded-t-2xl"/>
-                <Skeleton className="min-h-14 rounded-md"/>
-                <Skeleton className="min-h-14 rounded-md"/>
-                <Skeleton className="min-h-14 rounded-t-md rounded-b-2xl"/>
-            </div>
-        </Card>
-    )
-
     return (
-        <Card className={cn("py-5 px-5 pt-10 rounded-4xl", className)} {...props}>
-            <p className="text-secondary-foreground font-inter text-2xl font-medium leading-none">
-                Ratings
-            </p>
+        <Card className={cn("py-5 px-5 pt-10 rounded-4xl w-full xl:shrink-0 xl:w-100 h-fit", className)} {...props}>
+            {loading ?
+                <Skeleton className="min-h-6"/>
+                :
+                <p className="text-foreground font-inter text-2xl font-medium leading-none">
+                    Ratings
+                </p>
+            }
             <Separator/>
-            <ListItems round="all">
-                <ListText>Durchschnit</ListText>
-                <ListShape shape="star">
-                    <ListText color="white">{ratingsData?.mealRating?.toFixed(1)}</ListText>
-                </ListShape>
-            </ListItems>
+            {loading ?
+                    <Skeleton className="min-h-14 rounded-2xl"/>
+                    :
+                    <ListItems round="all">
+                        <ListText>Durchschnit</ListText>
+                        <ListShape shape="star">
+                            <ListText color="white">{ratingsData?.mealRating?.toFixed(1)}</ListText>
+                        </ListShape>
+                    </ListItems>
+            }
             <Separator/>
-            <RatingList ratings={ratingsData?.ratings} user={user!} existingRatingId={existingRatingId}
-                        userRating={userRating} onSubmit={submitRating}/>
+            {loading ?
+                    <div className="flex flex-col gap-0.5 overflow-auto">
+                        <Skeleton className="min-h-14 rounded-b-md rounded-t-2xl"/>
+                        <Skeleton className="min-h-14 rounded-md"/>
+                        <Skeleton className="min-h-14 rounded-md"/>
+                        <Skeleton className="min-h-14 rounded-t-md rounded-b-2xl"/>
+                    </div>
+                    :
+                    <RatingList ratings={ratingsData?.ratings} user={user!} existingRatingId={existingRatingId}
+                                userRating={userRating} onSubmit={submitRating}/>
+            }
         </Card>
     )
 };

@@ -42,9 +42,10 @@ const UserRating: React.FC<UserRatingProps> = ({user, userRating, existingRating
                         key={val}
                         shape="star"
                         className={`cursor-pointer`}
+                        classNameShape={`${val === userRating ? "fill-secondary-foreground" : ""}`}
                         onClick={() => onSubmit(val)}
                     >
-                        <ListText color="white">{val}</ListText>
+                        <ListText color="white" className={`${val === userRating ? "text-secondary" : ""}`}>{val}</ListText>
                     </ListShape>
                 ))}
             </div>

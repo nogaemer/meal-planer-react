@@ -1,11 +1,14 @@
 import React, {useEffect, useRef, useState} from "react";
-import {MealPage} from "@/pages/MealPage.tsx";
+import {MealComponent} from "@/components/meal/MealComponent.tsx";
 import type {Meal} from "@/types/meal.ts";
 import {useAuth} from "@/hooks/useAuth.ts";
 import {httpClient} from "@/services/httpClient.ts";
+import {useNavigate} from "react-router-dom";
+import MealCard from "@/components/meal/MealCard.tsx";
 
 const DashboardPage: React.FC = () => {
     const {user, isAuthenticated} = useAuth();
+    const navigate = useNavigate();
     const [meals, setMeals] = useState<Meal[]>([]);
     const [loading, setLoading] = useState(true);
     const [showBackdrop, setShowBackdrop] = useState(false);
@@ -18,13 +21,25 @@ const DashboardPage: React.FC = () => {
         left: number;
         width: number;
         height: number;
+        rounded: {
+            borderTopLeftRadius: string;
+            borderTopRightRadius: string;
+            borderBottomLeftRadius: string;
+            borderBottomRightRadius: string;
+        }
     } | null>(null);
 
     // Store refs for each MealPage
     const mealRefs = useRef<(HTMLDivElement | null)[]>([]);
 
     const handleMealClick = (index: number, mealId: string) => {
+        console.log("Meal clicked:", index, mealId);
         if (isClosing) return;
+
+        if (window.matchMedia("(max-width: 96rem)").matches) {
+            navigate(`/meal/${mealId}`)
+            return;
+        }
 
         const node = mealRefs.current[index];
         if (node) {
@@ -40,11 +55,18 @@ const DashboardPage: React.FC = () => {
                 left: rect.left,
                 width: rect.width,
                 height: rect.height,
+                rounded: {
+                    borderTopLeftRadius: "24px",
+                    borderTopRightRadius: "24px",
+                    borderBottomLeftRadius: "0",
+                    borderBottomRightRadius: "0",
+                }
             });
         }
+        window.history.pushState(null, "", `/meal/${mealId}`);
         setTimeout(() => {
             mealRefs.current[index]!.style.opacity = "0";
-        }, 50);
+        }, 0);
     };
 
     useEffect(() => {
@@ -68,6 +90,7 @@ const DashboardPage: React.FC = () => {
             }
             setFakeMeal(null);
             setIsClosing(false);
+            window.history.pushState(null, "", `/dashboard`);
         }, 1000);
     }
 
@@ -94,28 +117,39 @@ const DashboardPage: React.FC = () => {
     }
 
     return (
-        <div className="flex w-full min-h-screen p-5">
-            <div className="h-full w-64 shrink-0"></div>
-            <div className="flex flex-wrap gap-5">
+        <div className="flex w-full min-h-screen pt-5 sm:pl-5 sm:pr-0 px-2 relative">
+            <div className="h-[calc(100vh-40px)] hidden sm:flex w-64 shrink-0 bg-card rounded-2xl sticky top-5"></div>
+            <div className="grid grid-cols-[repeat(auto-fit,_minmax(300px,450px))] sm:grid-cols-[repeat(auto-fit,_minmax(330px,_1fr))] w-full sm:mx-12 gap-5 content-baseline">
                 {meals.map((meal, idx) => {
                     const image = meal.images[0].srcSetArray ? meal.images[0].srcSetArray[0] : meal.images[0].thumbnail;
 
-                    return(
-                    <div
-                        key={idx}
-                        ref={el => {
-                            mealRefs.current[idx] = el
-                        }}
-                        onClick={() => handleMealClick(idx, meal.id)}
-                        className="w-80 h-40 rounded-2xl overflow-hidden cursor-pointer"
-                    >
-                        <img
-                            src={image.replace("360x240", "1200x675") || "src/assets/meal-placeholder.png"}
-                            alt={meal.name}
-                            className="object-cover m-auto flex"
-                        />
-                    </div>
-                )})}
+                    return (
+                        // <div className="flex p-5 bg-accent rounded-2xl" key={meal.id}>
+                        //     <div
+                        //         key={idx}
+                        //         ref={el => {
+                        //             mealRefs.current[idx] = el
+                        //         }}
+                        //         onClick={() => handleMealClick(idx, meal.id)}
+                        //         className="w-40 h-40 rounded-2xl overflow-hidden cursor-pointer"
+                        //     >
+                        //         <img
+                        //             src={image.replace("360x240", "1200x675") || "src/assets/meal-placeholder.png"}
+                        //             alt={meal.name}
+                        //             className="object-cover m-auto flex w-full h-full"
+                        //         />
+                        //     </div>
+                        // </div>
+                        <MealCard mealId={meal.id} title={meal.name}
+                                  description={"Hackbällchen in Tomatensauce mit Mozzarella überbacken"}
+                                  imageUrl={image.replace("360x240", "1200x675") || "src/assets/meal-placeholder.png"}
+                                  rating={meal.rating} prepTime={meal.time} key={idx}
+                                  imgRef={el => {
+                                      mealRefs.current[idx] = el
+                                  }}
+                                  handleImageClick={() => handleMealClick(idx, meal.id)}/>
+                    )
+                })}
                 {fakeMeal && (
                     <>
                         <div
@@ -124,12 +158,14 @@ const DashboardPage: React.FC = () => {
                                 if (e.target === e.currentTarget) closeFakeMeal();
                             }}
                         >
-                            <MealPage
+                            <MealComponent
                                 mealId={fakeMeal.mealId}
                                 loadingImage={fakeMeal.image}
-                                fake
                                 top={fakeMeal.top}
                                 left={fakeMeal.left}
+                                width={fakeMeal.width}
+                                height={fakeMeal.height}
+                                rounded={fakeMeal.rounded}
                                 shouldClose={!showBackdrop}
                             />
 

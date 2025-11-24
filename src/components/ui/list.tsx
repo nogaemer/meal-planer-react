@@ -1,25 +1,30 @@
 import * as React from "react"
 import {cva, type VariantProps} from "class-variance-authority"
+import maskLeftUrl from "@/assets/list-shape-exclude.svg";
+import maskRightUrl from "@/assets/list-shape-exclude-flipped.svg";
+
 
 import {cn} from "@/lib/utils"
+import ListShapeStar from "@/assets/react/ListShapeStar.tsx";
 
 
 function ListShape({
     className,
+    classNameShape = "",
     shape = "pill",
     children,
     ...props
 }: React.ComponentProps<"div">
-    & { shape?: "pill" | "star" }) {
+    & { shape?: "pill" | "star", classNameShape?: string }) {
 
     switch (shape) {
         case "pill":
             return (
                 <div
                     data-slot="list-shape"
-                    className={cn("px-5 pt-0.5 bg-[#7e92be] flex flex-row items-center h-7", className)}
+                    className={cn("px-5 pt-0.5 bg-secondary flex flex-row items-center h-7", className)}
                     style={{
-                        mask: "url(\"src/assets/list-shape-exclude.svg\") -1px/contain no-repeat, url(\"src/assets/list-shape-exclude-flipped.svg\") calc(100% + 1px)/contain no-repeat, linear-gradient(#000 0 0)",
+                        mask: `url("${maskLeftUrl}") -1px/contain no-repeat, url("${maskRightUrl}") calc(100% + 1px)/contain no-repeat, linear-gradient(#000 0 0)`,
                         maskComposite: "exclude",
                     }}
                     {...props}
@@ -34,11 +39,7 @@ function ListShape({
                     className={cn("p-0 pt-0.5 flex flex-row items-center justify-center relative h-10 w-10", className)}
                     {...props}
                 >
-                    <img
-                        src="/src/assets/list-shape-star.svg"
-                        alt="List shape icon"
-                        className="absolute block inset-0 m-auto"
-                    />
+                    <ListShapeStar className={cn("absolute block inset-0 m-auto fill-secondary ", classNameShape)}/>
                     <div className="relative z-10 w-full flex justify-center items-center pt-1">
                         {children}
                     </div>
@@ -114,7 +115,7 @@ function List({className, ...props}: React.ComponentProps<"div">) {
         <div
             data-slot="card"
             className={cn(
-                "flex flex-col gap-0.5 overflow-y-scroll overflow-x-hidden rounded-2xl",
+                "flex flex-col gap-0.5 overflow-y-auto overflow-x-hidden rounded-2xl",
                 className
             )}
             {...props}

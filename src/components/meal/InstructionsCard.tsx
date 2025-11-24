@@ -21,7 +21,7 @@ const InstructionCard: React.FC<InstructionComponentProps & React.HTMLProps<HTML
 
     return (
         <Card className={cn("py-5 px-5 pt-10 rounded-4xl", className)} {...props}>
-            <p className="text-secondary-foreground font-inter text-2xl font-medium leading-none">
+            <p className="text-foreground font-inter text-2xl font-medium leading-none">
                 Zubereitung
             </p>
             <Separator/>
@@ -34,8 +34,8 @@ const InstructionListSkeleton: React.FC = () => (
     <List className="flex flex-col gap-8">
 
         {Array.from({ length: 5 }).map((_, idx) => (
-            <div className="flex w-full items-center gap-3" key={idx}>
-                <div className="relative shrink-0 h-16 w-16 items-center justify-center">
+            <div className="flex w-full gap-4" key={idx}>
+                <div className="relative shrink-0 h-16 w-16 justify-center">
                     {/*<img src="src/assets/instructions-number-bg-oval.svg" alt="oval background"/>*/}
                     <InstructionsNumberBgOval/>
                     <div className="absolute inset-0 flex items-center justify-center">
@@ -63,12 +63,12 @@ const InstructionList: React.FC<InstructionListProps> = ({instructions}) => (
         {instructions?.map((Instruction, idx) => {
 
             return (
-                <div className="flex w-full items-center gap-3" key={idx}>
-                    <div className="relative shrink-0 h-16 w-16 items-center justify-center">
+                <div className="flex w-full gap-3" key={idx}>
+                    <div className="relative shrink-0 sm:w-16 sm:h-16 w-12 h-12 items-center justify-center float-left">
                         {/*<img src="src/assets/instructions-number-bg-oval.svg" alt="oval background"/>*/}
-                        <InstructionsNumberBgOval/>
+                        <InstructionsNumberBgOval className="sm:w-16 sm:h-16 w-12 h-12"/>
                         <div className="absolute inset-0 flex items-center justify-center">
-                            <span className="text-accent-foreground font-semibold text-4xl">{idx + 1}</span>
+                            <span className="text-accent-foreground font-semibold sm:text-4xl text-2xl">{idx + 1}</span>
                         </div>
                     </div>
                     <p className="text-muted-foreground">{Instruction}</p>

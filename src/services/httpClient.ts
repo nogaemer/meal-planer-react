@@ -9,8 +9,14 @@ export class HttpClient {
     private onTokenRefresh?: (tokens: AuthenticationResponse) => void;
     private onAuthError?: () => void;
 
-    constructor(baseURL: string = 'http://localhost:8080') {
-        this.baseURL = baseURL;
+    constructor(baseURL?: string) {
+        if (baseURL !== undefined && baseURL !== null) {
+            this.baseURL = baseURL;
+        } else if (import.meta.env.VITE_SPRING_APP_API_URL) {
+            this.baseURL = import.meta.env.VITE_SPRING_APP_API_URL;
+        } else {
+            throw new Error('VITE_SPRING_APP_API_URL environment variable is not defined. Please set it in your environment.');
+        }
         this.loadTokensFromStorage();
     }
 

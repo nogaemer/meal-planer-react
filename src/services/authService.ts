@@ -13,7 +13,7 @@ export class AuthService {
     }
 
     async oAuthLogin(provider: string) {
-        window.location.href = `http://localhost:8080/api/v1/auth/login/${provider}`;
+        window.location.href = `${import.meta.env.VITE_SPRING_APP_API_URL}/api/v1/auth/login/${provider}`;
     }
 
     async register(data: RegisterRequest): Promise<AuthenticationResponse> {

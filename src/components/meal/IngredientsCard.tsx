@@ -102,38 +102,40 @@ const IngredientsCard: React.FC<IngredientsComponentProps & React.HTMLAttributes
     }) ?? [];
 
     return (
-        <Card className={cn("py-5 px-5 pt-10 rounded-4xl max-h-[calc(100vh-40px)]", className)} {...props}>
-            <p className="text-secondary-foreground font-inter text-2xl font-medium leading-none">
-                Zutaten
-            </p>
-            <Separator/>
-            {(loading || !meal) ? <IngredientsCardSkeleton/> :
-                <>
-                    <div className="flex justify-between items-center">
-                        <ListText>{wantedPortions} Portion{wantedPortions > 1 ? "en" : ""}</ListText>
-                        <div className="flex gap-2">
-                            <Button
-                                variant="outline"
-                                size="icon"
-                                className="size-8 text-accent-foreground shadow-none"
-                                onClick={() => setWantedPortions(Math.max(1, wantedPortions - 1))}
-                            >
-                                <Minus/>
-                            </Button>
-                            <Button
-                                variant="outline"
-                                size="icon"
-                                className="size-8 text-accent-foreground shadow-none"
-                                onClick={() => setWantedPortions(wantedPortions + 1)}
-                            >
-                                <Plus/>
-                            </Button>
+        <div className="pb-5 overflow-hidden w-full xl:shrink-0 xl:w-100">
+            <Card className={cn("py-5 px-5 pt-10 mb-5 rounded-4xl", className)} {...props}>
+                <p className="text-foreground font-inter text-2xl font-medium leading-none">
+                    Zutaten
+                </p>
+                <Separator/>
+                {(loading || !meal) ? <IngredientsCardSkeleton/> :
+                    <>
+                        <div className="flex justify-between items-center">
+                            <ListText>{wantedPortions} Portion{wantedPortions > 1 ? "en" : ""}</ListText>
+                            <div className="flex gap-2">
+                                <Button
+                                    variant="outline"
+                                    size="icon"
+                                    className="size-8 text-accent-foreground shadow-none"
+                                    onClick={() => setWantedPortions(Math.max(1, wantedPortions - 1))}
+                                >
+                                    <Minus/>
+                                </Button>
+                                <Button
+                                    variant="outline"
+                                    size="icon"
+                                    className="size-8 text-accent-foreground shadow-none"
+                                    onClick={() => setWantedPortions(wantedPortions + 1)}
+                                >
+                                    <Plus/>
+                                </Button>
+                            </div>
                         </div>
-                    </div>
-                    <Separator/>
-                    <IngredientList ingredients={updatedIngredients}/>
-                </>}
-        </Card>
+                        <Separator/>
+                        <IngredientList ingredients={updatedIngredients}/>
+                    </>}
+            </Card>
+        </div>
     );
 };
 
@@ -160,21 +162,10 @@ const IngredientsCardSkeleton = () => (
         </div>
         <Separator/>
         <List>
-            {Array.from({length: 3}).map((_, idx, arr) => {
-                let round: "top" | "none" | "all" | "bottom";
-                if (arr.length === 1) round = "all";
-                else if (idx === 0) round = "top";
-                else if (idx === arr.length - 1) round = "bottom";
-                else round = "none";
-
-                return (
-                    <ListItems key={idx} round={round} className="shrink-0">
-                        <Skeleton className="w-20 h-5 rounded-md"/>
-                        <ListShape shape="pill" className="animate-pulse w-15">
-                        </ListShape>
-                    </ListItems>
-                )
-            })}
+            <Skeleton className="min-h-14 rounded-b-md rounded-t-2xl"/>
+            <Skeleton className="min-h-14 rounded-md"/>
+            <Skeleton className="min-h-14 rounded-md"/>
+            <Skeleton className="min-h-14 rounded-t-md rounded-b-2xl"/>
         </List>
     </>
 )
