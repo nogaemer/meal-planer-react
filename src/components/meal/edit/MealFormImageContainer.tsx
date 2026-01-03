@@ -1,5 +1,5 @@
 import {FieldGroup, FieldLegend, FieldSet} from "@/components/ui/field.tsx";
-import {type ChangeEvent, useRef, useState} from "react";
+import {type ChangeEvent, useEffect, useRef, useState} from "react";
 import {
     Dialog,
     DialogClose,
@@ -12,40 +12,66 @@ import {Button} from "@/components/ui/button.tsx";
 
 import {Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle,} from "@/components/ui/empty"
 import {File, Trash} from "lucide-react";
+import type {Image} from "@/types/meal.ts";
+import {httpClient} from "@/services/httpClient.ts";
 
-export const MealEditImageContainer = () => {
-    const [images, setImages] = useState<string[]>([]);
+interface MealFormImageContainerProps {
+    images: Image[];
+    onChange: (next: Image[]) => void;
+}
+
+export const MealFormImageContainer = ({images, onChange}: MealFormImageContainerProps) => {
     const [selectedIndex, setSelectedIndex] = useState(0);
     const fileInputRef = useRef<HTMLInputElement | null>(null);
     const [dialogOpen, setDialogOpen] = useState(false);
+    const [thumbLoaded, setThumbLoaded] = useState<Record<number, boolean>>({});
 
-    const onAddFiles = (e: ChangeEvent<HTMLInputElement>) => {
-        const files = e.target.files;
-        if (!files || files.length === 0) return;
-        const newImages: string[] = [];
-        for (let i = 0; i < files.length; i++) {
-            const file = files[i];
-            const url = URL.createObjectURL(file);
-            newImages.push(url);
+    useEffect(() => {
+        if (selectedIndex >= images.length) {
+            setSelectedIndex(Math.max(0, images.length - 1));
         }
-        setImages(prev => [...prev, ...newImages]);
-        // select newly added image
-        setSelectedIndex(images.length);
-        // clear input so same file can be added again if needed
-        e.currentTarget.value = "";
+    }, [images, selectedIndex]);
+
+
+    async function fileToBase64String(file: File): Promise<string> {
+        return await new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => {
+                const dataUrl = reader.result as string;
+                const base64 = dataUrl.split(',')[1] ?? "";
+                resolve(base64);
+            };
+            reader.onerror = () => reject(reader.error);
+            reader.readAsDataURL(file);
+        });
     }
 
+    const onAddFiles = async (e: ChangeEvent<HTMLInputElement>) => {
+        const files = e.target.files;
+        if (!files || files.length === 0) return;
+
+        const base64s = await Promise.all(Array.from(files).map(fileToBase64String));
+        const uploaded: Image[] = [];
+        for (const data of base64s) {
+            const image = await httpClient.post<Image>(`/api/v1/images/upload`, {base64: data});
+            uploaded.push(image);
+        }
+
+        onChange([...images, ...uploaded]);
+        setSelectedIndex(images.length);
+        e.currentTarget.value = "";
+    };
+
+
     const removeImage = (index: number) => {
-        URL.revokeObjectURL(images[index]);
-        setImages(prev => {
-            const next = prev.filter((_, i) => i !== index);
-            // release object URL if it was created from a file
-            // (we can't easily know; in this simple implementation we won't track origins)
-            if (selectedIndex >= next.length) {
-                setSelectedIndex(Math.max(0, next.length - 1));
-            }
-            return next;
-        });
+        images[index].deleteUrls?.forEach(
+            async (url) => await fetch(url)
+        )
+        const next = images.filter((_, i) => i !== index);
+        onChange(next);
+        if (selectedIndex >= next.length) {
+            setSelectedIndex(Math.max(0, next.length - 1));
+        }
     }
 
     return (
@@ -60,7 +86,7 @@ export const MealEditImageContainer = () => {
                                 <div className="mb-4 w-full rounded-xl overflow-hidden">
                                     {images && images.length > 0 ? (
                                         <img
-                                            src={images[selectedIndex]}
+                                            src={images[selectedIndex].srcSetArray[images[selectedIndex].srcSetArray.length - 1]}
                                             alt={`Bild ${selectedIndex + 1}`}
                                             className="w-full h-64 object-cover"
                                         />
@@ -101,15 +127,37 @@ export const MealEditImageContainer = () => {
                                             }
                                         }}
                                     >
-                                        {images.map((src, idx) => (
+                                        {images.map((image, idx) => (
                                             <button
                                                 key={idx}
                                                 type="button"
                                                 onClick={() => setSelectedIndex(idx)}
                                                 className={`w-20 h-20 shrink-0 rounded-lg overflow-hidden border ${selectedIndex === idx ? 'border-primary' : 'border-transparent'} p-0`}
                                             >
-                                                <img src={src} alt={`thumb-${idx}`}
-                                                     className="w-full h-full object-cover"/>
+                                                <div className="w-full h-full relative">
+                                                    {!thumbLoaded[idx] && (
+                                                        <div
+                                                            className="absolute inset-0 flex items-center justify-center bg-white/30">
+                                                            <svg className="w-6 h-6 animate-spin text-primary"
+                                                                 viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                                 xmlns="http://www.w3.org/2000/svg">
+                                                                <circle className="opacity-25" cx="12" cy="12" r="10"
+                                                                        strokeWidth="4"></circle>
+                                                                <path className="opacity-75"
+                                                                      d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                                                                      strokeWidth="4"></path>
+                                                            </svg>
+                                                        </div>
+                                                    )}
+                                                    <img
+                                                        src={image.thumbnail}
+                                                        alt={`thumb-${idx}`}
+                                                        onLoad={() => setThumbLoaded(prev => ({...prev, [idx]: true}))}
+                                                        onError={() => setThumbLoaded(prev => ({...prev, [idx]: true}))}
+                                                        className="w-full h-full object-cover"
+                                                        aria-busy={!thumbLoaded[idx]}
+                                                    />
+                                                </div>
                                             </button>
                                         ))}
                                     </div>}
@@ -146,9 +194,9 @@ export const MealEditImageContainer = () => {
                                                         </div>
                                                     </label>
                                                 </div>
-                                                {images.map((src, idx) => (
+                                                {images.map((image, idx) => (
                                                     <div key={idx} className="relative w-24 h-24">
-                                                        <img src={src} alt={`manage-${idx}`}
+                                                        <img src={image.thumbnail} alt={`manage-${idx}`}
                                                              className="w-24 h-24 object-cover rounded-md"/>
                                                         <div
                                                             className="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">

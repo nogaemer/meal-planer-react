@@ -1,13 +1,13 @@
 import React from "react";
 import type {Meal} from "@/types/meal.ts";
-import {Clock4, Star} from "lucide-react";
+import {Clock4, Edit, Star} from "lucide-react";
 import {Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious} from "@/components/ui/carousel.tsx";
 import {cn} from "@/lib/utils.ts";
 import {Skeleton} from "@/components/ui/skeleton.tsx";
 import RatingCard from "@/components/meal/rating/RatingCard.tsx";
 import {Drawer, DrawerContent, DrawerTrigger} from "@/components/ui/drawer.tsx";
 import {formatMinutes} from "@/utils/time.ts";
-import {AspectRatio} from "@radix-ui/react-aspect-ratio";
+import {useNavigate} from "react-router-dom";
 
 interface MealCoverImageProps {
     meal: Meal | null;
@@ -27,6 +27,10 @@ export const MealCoverImage: React.FC<MealCoverImageProps & React.HTMLAttributes
     isCard,
     ...props
 }) => {
+    const navigate = useNavigate();
+
+    const hasImages = !!meal && !loading && meal.images.length > 0;
+    const heroSrc = loadingImage || (hasImages && (meal.images[0]?.srcSetArray?.at(0)?.replace("360x240", "1200x675") || meal.images[0]?.thumbnail.replace("360x240", "1200x675"))) || "";
 
     return (
         <div
@@ -38,16 +42,11 @@ export const MealCoverImage: React.FC<MealCoverImageProps & React.HTMLAttributes
                                   className={`flex items-center justify-center overflow-hidden transition-[border-radius] duration-1000 w-full h-full
                                   ${isCard ? "" : "lg:rounded-4xl"}`}>
                         {isFullScreen ?
-                            <AspectRatio ratio={16 / 9}>
-                                <img
-                                    src={loadingImage || (!(!meal || loading || meal.images.length === 0)
-                                        && (meal.images[0]?.srcSetArray?.at(0)?.replace("360x240", "1200x675")
-                                        || meal.images[0]?.thumbnail.replace("360x240", "1200x675")))
-                                        || "https://placehold.co/360x240/png"}
-                                    alt={""}
-                                    className={`w-full h-full object-cover m-auto flex border-1 border-transparent`}
-                                />
-                            </AspectRatio>
+                            <img
+                                src={heroSrc}
+                                alt={""}
+                                className={`w-full h-full object-cover m-auto flex border-1 border-transparent ${!hasImages ? "animate-pulse bg-muted filter brightness-20" : ""}`}
+                            />
                             :
                             <img
                                 src={loadingImage}
@@ -85,6 +84,19 @@ export const MealCoverImage: React.FC<MealCoverImageProps & React.HTMLAttributes
 
                 <MealInfo difficulty={meal?.difficulty} time={meal?.time} loading={(!meal || loading)}
                           className={`hidden sm:flex absolute transition-opacity duration-250 delay-250 ${isCard ? "pointer-events-none opacity-0" : "opacity-100"}`}/>
+
+
+                <a href={`/meal/${meal?.id}/edit`}
+                   className={`absolute flex top-5 right-5 justify-center items-center size-10 rounded-2xl 
+                    border backdrop-blur-sm bg-background/80 transition-opacity duration-250 delay-250 ${isCard ? "pointer-events-none opacity-0" : "opacity-100"}`}
+
+                   onClick={(e) => {
+                       e.preventDefault();
+                       navigate(`/meal/${meal?.id}/edit`);
+                   }}>
+                    <Edit className="size-6 text-accent-foreground"/>
+                </a>
+
 
                 <Drawer>
                     <DrawerTrigger

@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from "react-router-dom";
 import {formatMinutes} from "@/utils/time.ts";
 import ListShapeStar from "@/assets/react/ListShapeStar.tsx";
 import {Clock4} from "lucide-react";
@@ -30,9 +31,9 @@ const MealCard: React.FC<MealCardProps> = ({
 
         <div className="flex flex-col px-5 py-4">
             <div className="flex flex-col">
-                <a href={`/meal/${mealId}`}>
+                <Link to={`/meal/${mealId}`} onClick={(e) => e.stopPropagation()}>
                     <h2 className="line-clamp-2 overflow-hidden text-ellipsis text-lg cursor-pointer">{title}</h2>
-                </a>
+                </Link>
                 <p className="line-clamp-1 overflow-hidden text-ellipsis text-sm text-muted-foreground">{description}</p>
             </div>
 

@@ -1,35 +1,41 @@
 import {useNavigate, useParams} from "react-router-dom";
-import {MealEditHeader} from "@/components/meal/edit/MealEditHeader.tsx";
-import {MealEditMetaData} from "@/components/meal/edit/MealEditMetaData.tsx";
-import {MealEditImageContainer} from "@/components/meal/edit/MealEditImageContainer.tsx";
-import {MealEditInstructions} from "@/components/meal/edit/MealEditInstructions.tsx";
-import {MealEditIngredients} from "@/components/meal/edit/MealEditIngredients.tsx";
+import {MealForm} from "@/components/meal/edit/MealForm.tsx";
+import {useEffect, useState} from "react";
+import type {Meal} from "@/types/meal.ts";
+import {httpClient} from "@/services/httpClient.ts";
 
 export const MealEditPage = () => {
     const {id: mealId} = useParams();
     const navigate = useNavigate()
+    const [meal, setMeal] = useState<Meal>()
+
+    useEffect(() => {
+        if (!mealId || mealId === "undefined") {
+            navigate("/dashboard");
+        }
+
+        (async () => {
+            try {
+                const res = await httpClient.get<Meal>(`/api/v1/meals/${mealId}`);
+                const data = (res && 'data' in (res as any)) ? (res as any).data : res;
+                setMeal(data);
+            } catch (err) {
+                console.error(err);
+                navigate("/dashboard");
+            }
+        })();
+
+    }, [mealId, navigate]);
 
     if (!mealId || mealId === "undefined") {
-        console.log("No mealId provided")
-        navigate("/dashboard")
-        return
+        return null;
+    }
+
+    if (!meal) {
+        return <div className="flex h-screen items-center justify-center">Laden...</div>;
     }
 
     return (
-        <div className="flex relative h-screen overflow-y-scroll  p-5 sm:px-10 justify-center bg-accent" style={{scrollbarWidth: "none"}}>
-            <div className="flex flex-col w-full max-w-7xl gap-4">
-                <MealEditHeader/>
-                <div className="flex gap-4 w-full">
-                    <div className="flex flex-col gap-4 w-2/3">
-                        <MealEditMetaData/>
-                        <MealEditInstructions/>
-                    </div>
-                    <div className="flex flex-col gap-4 w-lg">
-                        <MealEditImageContainer/>
-                        <MealEditIngredients />
-                    </div>
-                </div>
-            </div>
-        </div>
+        <MealForm id={mealId} mealInit={meal}/>
     )
 }

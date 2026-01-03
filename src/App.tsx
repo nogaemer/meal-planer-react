@@ -10,13 +10,15 @@ import AuthCallbackPage from "@/pages/AuthCallbackPage.tsx";
 import {MealPage} from "./pages/MealPage";
 import {ThemeProvider} from "@/contexts/theme-provider.tsx";
 import {MealEditPage} from "@/pages/MealEditPage.tsx";
+import {Toaster} from "@/components/ui/sonner.tsx";
+import Navbar from "@/components/Navbar";
 
 function App() {
-
     return (
         <AuthProvider>
             <ThemeProvider storageKey="app-theme" defaultTheme="system">
                 <BrowserRouter>
+                    <Navbar />
                     <Routes>
                         <Route path="/" element={<HomePage/>}/>
                         <Route path="/login" element={<LoginPage/>}/>
@@ -28,6 +30,7 @@ function App() {
                         </Route>
                     </Routes>
                 </BrowserRouter>
+                <Toaster />
             </ThemeProvider>
         </AuthProvider>
     );

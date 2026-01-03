@@ -77,7 +77,7 @@ const DashboardPage: React.FC = () => {
         requestAnimationFrame(() => {
             setShowBackdrop(true)
         });
-    }, [fakeMeal]);
+    }, [fakeMeal, loading]);
 
     const closeFakeMeal = () => {
         if (isClosing) return;
@@ -112,34 +112,13 @@ const DashboardPage: React.FC = () => {
         }
     }
 
-    if (loading) {
-        return <div>Loading...</div>;
-    }
-
     return (
-        <div className="flex w-full min-h-screen pt-5 sm:pl-5 sm:pr-0 px-2 relative">
-            <div className="h-[calc(100vh-40px)] hidden sm:flex w-64 shrink-0 bg-card rounded-2xl sticky top-5"></div>
-            <div className="grid grid-cols-[repeat(auto-fit,_minmax(300px,450px))] sm:grid-cols-[repeat(auto-fit,_minmax(330px,_1fr))] w-full sm:mx-12 gap-5 content-baseline">
+        <div className="flex w-full min-h-screen pt-5 sm:px-5 px-2 relative">
+            <div className="grid grid-cols-[repeat(auto-fit,_minmax(300px,450px))] sm:grid-cols-[repeat(auto-fit,_minmax(330px,_1fr))] w-full  gap-5 content-baseline">
                 {meals.map((meal, idx) => {
                     const image = meal.images[0].srcSetArray ? meal.images[0].srcSetArray[0] : meal.images[0].thumbnail;
 
                     return (
-                        // <div className="flex p-5 bg-accent rounded-2xl" key={meal.id}>
-                        //     <div
-                        //         key={idx}
-                        //         ref={el => {
-                        //             mealRefs.current[idx] = el
-                        //         }}
-                        //         onClick={() => handleMealClick(idx, meal.id)}
-                        //         className="w-40 h-40 rounded-2xl overflow-hidden cursor-pointer"
-                        //     >
-                        //         <img
-                        //             src={image.replace("360x240", "1200x675") || "src/assets/meal-placeholder.png"}
-                        //             alt={meal.name}
-                        //             className="object-cover m-auto flex w-full h-full"
-                        //         />
-                        //     </div>
-                        // </div>
                         <MealCard mealId={meal.id} title={meal.name}
                                   description={"Hackbällchen in Tomatensauce mit Mozzarella überbacken"}
                                   imageUrl={image.replace("360x240", "1200x675") || "src/assets/meal-placeholder.png"}

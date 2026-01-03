@@ -52,7 +52,7 @@ export const MealComponent: React.FC<MealPageProps & React.HTMLAttributes<HTMLDi
         if (mealId && isAuthenticated && user) {
             fetchMeal();
         }
-    }, [mealId, isAuthenticated]);
+    }, [mealId, isAuthenticated, user]);
 
     const fetchMeal = async (): Promise<void> => {
         setIsLoading(true);
@@ -70,13 +70,12 @@ export const MealComponent: React.FC<MealPageProps & React.HTMLAttributes<HTMLDi
 
     useEffect(() => {
         if (isFullScreen) return;
-        console.log(rounded);
 
         setIsCard(true); // Initial state
         requestAnimationFrame(() => {
             setIsCard(false); // Start transition after paint
         });
-    }, []);
+    }, [isFullScreen]);
 
     useEffect(() => {
         if (!shouldClose) return;

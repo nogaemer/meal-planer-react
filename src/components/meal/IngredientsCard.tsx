@@ -5,7 +5,7 @@ import {Button} from "@/components/ui/button.tsx";
 import {Minus, Plus} from "lucide-react";
 import {List, ListItems, ListShape, ListText} from "@/components/ui/list.tsx";
 import {cn} from "@/lib/utils.ts";
-import type {Ingredient, Meal} from "@/types/meal.ts";
+import type {MealIngredient, Meal} from "@/types/meal.ts";
 import {Skeleton} from "@/components/ui/skeleton.tsx";
 
 // --- Fraction/Decimal helpers ---
@@ -172,7 +172,7 @@ const IngredientsCardSkeleton = () => (
 
 
 interface IngredientListProps {
-    ingredients: Ingredient[];
+    ingredients: MealIngredient[];
 }
 
 const IngredientList: React.FC<IngredientListProps> = ({ingredients}) => (
@@ -185,13 +185,13 @@ const IngredientList: React.FC<IngredientListProps> = ({ingredients}) => (
             else round = "none";
 
             return (
-                <ListItems key={ingredient.name ?? idx} round={round} className="shrink-0">
-                    <ListText>{ingredient.name}</ListText>
+                <ListItems key={ingredient.ingredient.name ?? idx} round={round} className="shrink-0">
+                    <ListText>{ingredient.ingredient.name}</ListText>
                     {(ingredient.amount || ingredient.unit) && (
                         <ListShape shape="pill">
                             <ListText color="white">{ingredient.amount}</ListText>
-                            {(ingredient.amount && ingredient.unit) && <p>{'\u00A0'}</p>}
-                            <ListText color="white">{ingredient.unit}</ListText>
+                            {(ingredient.amount && ingredient.unit.abbreviation) && <p>{'\u00A0'}</p>}
+                            <ListText color="white">{ingredient.unit.fullName}</ListText>
                         </ListShape>
                     )}
                 </ListItems>

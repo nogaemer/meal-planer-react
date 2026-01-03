@@ -1,7 +1,25 @@
-export interface Ingredient {
-    name: string;
+export interface MealIngredient {
+    ingredient: Ingredient;
     amount: string;
-    unit: string;
+    unit: Unit;
+}
+
+export interface Ingredient {
+    id: string;
+    name: string;
+    category: string;
+    unit: Unit;
+}
+
+export interface Unit {
+    id: string;
+    abbreviation: string;
+    abbreviationPlural: string;
+    fullName: string;
+    fullNamePlural: string;
+    countable: boolean;
+    category: string;
+    description: string;
 }
 
 export interface Image {
@@ -14,7 +32,9 @@ export interface Image {
 export interface Tag {
     id: string;
     name: string;
-    meals: string[];
+    type: string;
+    description: string;
+    color: string;
 }
 
 export interface Rating {
@@ -29,7 +49,8 @@ export interface Rating {
 export interface Meal {
     id: string;
     name: string;
-    ingredients: Ingredient[];
+    description: string;
+    ingredients: MealIngredient[];
     instructions: string[];
     images: Image[];
     difficulty: string;
@@ -41,4 +62,16 @@ export interface Meal {
     rating: number;
     ratings: Rating[];
     notes: string[];
+}
+
+export interface MealUpload {
+    name: string;
+    ingredients: MealIngredient[],
+    instructions: string[],
+    tags: Tag[],
+    images: Image[];
+    difficulty: string,
+    time: number,
+    portions: number,
+    calories: number
 }
