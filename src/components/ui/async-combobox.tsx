@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
-import { Check, ChevronsUpDown } from 'lucide-react';
+import {Check, ChevronsUpDown} from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
   Popover,
@@ -94,11 +94,11 @@ export function AsyncCombobox<T>({
           role="combobox"
           aria-expanded={open}
           className={cn(
-            "w-full justify-between text-left font-normal",
+            "w-full justify-between text-left font-normal ",
             !value && "text-muted-foreground"
           )}
         >
-          {value ? getLabel(value) : placeholder}
+            <p className="truncate">{value ? getLabel(value) : placeholder}</p>
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>

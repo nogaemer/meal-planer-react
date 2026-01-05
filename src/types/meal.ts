@@ -46,6 +46,20 @@ export interface Rating {
     userId: string;
 }
 
+export interface MealFilter {
+    name?: string;
+    minTime?: number;
+    maxTime?: number;
+    ingredients?: string[];
+    minIngredientMatch?: number;
+    userIds?: string[];
+    minUserRating?: number;
+    requireUserRatingMatch?: boolean;
+    sortBy?: string;
+    limit?: number;
+    skip?: number;
+}
+
 export interface Meal {
     id: string;
     name: string;

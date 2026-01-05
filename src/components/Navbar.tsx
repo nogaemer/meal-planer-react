@@ -40,8 +40,18 @@ const Navbar: React.FC = () => {
 
                 {/* Desktop search - visible on md and up */}
                 <div className="hidden md:flex flex-1 items-center max-w-2xl">
-                    <Input placeholder="Search meals, tags, ingredients..." className="mr-3 h-9"/>
-                    <Button variant="outline" onClick={() => { /* TODO: hook up search */ }}>
+                    <Input
+                        placeholder="Search meals, tags, ingredients..."
+                        className="mr-3 h-9"
+                        value={query}
+                        onChange={(e) => setQuery(e.target.value)}
+                        onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                                navigate(`/dashboard?q=${encodeURIComponent(query)}`);
+                            }
+                        }}
+                    />
+                    <Button variant="outline" onClick={() => navigate(`/dashboard?q=${encodeURIComponent(query)}`)}>
                         Search
                     </Button>
                 </div>
@@ -98,7 +108,7 @@ const Navbar: React.FC = () => {
                                             className="absolute right-2 top-2.5 h-6"
                                             onClick={() => {
                                                 // For now just navigate to search page with query param
-                                                navigate(`/search?q=${encodeURIComponent(query)}`);
+                                                navigate(`/dashboard?q=${encodeURIComponent(query)}`);
                                                 setOpen(false);
                                             }}
                                         >
@@ -116,7 +126,7 @@ const Navbar: React.FC = () => {
                                                     className="w-full text-left px-3 py-2 rounded-md bg-transparent hover:bg-accent/5 transition text-sm"
                                                     onClick={() => {
                                                         setQuery(s);
-                                                        navigate(`/search?q=${encodeURIComponent(s)}`);
+                                                        navigate(`/dashboard?q=${encodeURIComponent(s)}`);
                                                         setOpen(false);
                                                     }}
                                                 >

@@ -1,6 +1,6 @@
 import './App.css';
 import {AuthProvider} from '@/contexts/auth-context.tsx';
-import {BrowserRouter, Route, Routes} from 'react-router-dom';
+import {BrowserRouter, Outlet, Route, Routes} from 'react-router-dom';
 import ProtectedRoute from "@/components/ProtectedRoute.tsx";
 
 import HomePage from '@/pages/HomePage.tsx';
@@ -18,15 +18,18 @@ function App() {
         <AuthProvider>
             <ThemeProvider storageKey="app-theme" defaultTheme="system">
                 <BrowserRouter>
-                    <Navbar />
+
                     <Routes>
+
                         <Route path="/" element={<HomePage/>}/>
                         <Route path="/login" element={<LoginPage/>}/>
                         <Route path="/auth/callback" element={<AuthCallbackPage/>}/>
                         <Route element={<ProtectedRoute/>}>
-                            <Route path="/dashboard" element={<DashboardPage/>}/>
-                            <Route path="/meal/:id" element={<MealPage/>}/>
-                            <Route path="/meal/:id/edit" element={<MealEditPage/>}/>
+                            <Route element={<><Navbar /><Outlet /></>}>
+                                <Route path="/dashboard" element={<DashboardPage/>}/>
+                                <Route path="/meal/:id" element={<MealPage/>}/>
+                                <Route path="/meal/:id/edit" element={<MealEditPage/>}/>
+                            </Route>
                         </Route>
                     </Routes>
                 </BrowserRouter>
