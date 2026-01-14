@@ -89,3 +89,9 @@ export interface MealUpload {
     portions: number,
     calories: number
 }
+
+export interface SortParameter {
+    id: string;
+    name: string;
+    selected: boolean;
+}

@@ -6,12 +6,15 @@ import { cn } from '@/lib/utils';
 interface IngredientComboboxProps {
     value?: Ingredient;
     onChange: (i?: Ingredient) => void;
+    defaultItems?: Ingredient[];
 }
 
-export function IngredientCombobox({ value, onChange }: IngredientComboboxProps) {
+export function IngredientCombobox({ value, onChange, defaultItems}: IngredientComboboxProps) {
+
     return (
         <AsyncCombobox<Ingredient>
             value={value}
+            defaultItems={defaultItems}
             onChange={onChange}
             fetchUrl="/api/v1/ingredients"
             getLabel={(i) => i.name}

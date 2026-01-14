@@ -1,4 +1,4 @@
-import {useCallback, useEffect, useMemo, useState} from "react";
+import React, {useCallback, useEffect, useMemo, useState} from "react";
 import {useNavigate} from "react-router-dom";
 import {toast} from "sonner";
 import {MealFormHeader} from "@/components/meal/edit/MealFormHeader.tsx";
@@ -35,20 +35,12 @@ const createDefaultMeal = (): Meal => ({
 const sanitizeInstructions = (list: string[]) =>
     list.map((step) => step.trim()).filter((step) => step.length > 0);
 
-const sanitizeIngredients = (list: MealIngredient[]) =>
-    list
-        .map((ingredient) => ({
-            name: ingredient.name.trim(),
-            amount: ingredient.amount.trim(),
-            unit: ingredient.unit,
-        }))
-        .filter((ingredient) => ingredient.name && ingredient.amount && ingredient.unit);
-
 
 export const MealForm = ({
     id,
-    mealInit
-}: MealFormProps) => {
+    mealInit,
+    ...props
+}: MealFormProps & React.HTMLAttributes<HTMLDivElement>) => {
     const navigate = useNavigate();
     const [meal, setMeal] = useState<Meal>(() => mealInit ?? createDefaultMeal());
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -132,8 +124,7 @@ export const MealForm = ({
             return;
         }
 
-        const normalizedIngredients = sanitizeIngredients(meal.ingredients);
-        if (normalizedIngredients.length === 0) {
+        if (meal.ingredients.length === 0) {
             toast.error("Bitte mindestens eine Zutat hinzufügen.");
             return;
         }
@@ -150,7 +141,7 @@ export const MealForm = ({
             time,
             portions,
             calories,
-            ingredients: normalizedIngredients,
+            ingredients: meal.ingredients,
             instructions: normalizedInstructions,
             images: meal.images,
             tags: meta.tags,
@@ -164,11 +155,11 @@ export const MealForm = ({
             if (id) {
                 const meal = await httpClient.put<Meal>(`/api/v1/meals/${id}`, payload);
                 toast.success("Rezept erfolgreich aktualisiert.");
-                navigate(`/meal/${meal.id}`, {replace: true})
+                navigate(`/meal/${meal.id}`)
             } else {
-                await httpClient.post("/api/v1/meals", payload);
+                const meal = await httpClient.post<Meal>("/api/v1/meals", payload);
                 toast.success("Rezept erfolgreich erstellt.");
-                navigate(`/meal/${meal.id}`, {replace: true})
+                navigate(`/meal/${meal.id}`)
             }
 
             resetForm();
@@ -182,8 +173,9 @@ export const MealForm = ({
         meal.instructions, meal.name, meal.portions, meal.time, meta.difficulty, meta.tags, navigate, resetForm]);
 
     return (
-        <div className="flex relative overflow-y-scroll p-5 sm:px-10 justify-center bg-accent"
-             style={{scrollbarWidth: "none"}}>
+        <div className={`flex relative overflow-y-scroll p-5 sm:px-10 justify-center bg-accent`}
+             style={{scrollbarWidth: "none"}}
+             {...props}>
             <div className="flex flex-col w-full xl:max-w-7xl max-w-2xl gap-4">
                 <MealFormHeader onCancel={handleCancel} onSubmit={handleSubmit} isSubmitting={isSubmitting}/>
                 <div className="flex xl:flex-row flex-col gap-4 w-full">

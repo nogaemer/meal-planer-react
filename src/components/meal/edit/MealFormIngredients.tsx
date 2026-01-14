@@ -5,6 +5,7 @@ import {Trash} from 'lucide-react';
 import type {Ingredient, MealIngredient, Unit} from "@/types/meal.ts";
 import { UnitCombobox } from './UnitCombobox';
 import {IngredientCombobox} from "@/components/meal/edit/IngredientCombobox.tsx";
+import {httpClient} from "@/services/httpClient.ts";
 
 type IngredientRow = {
     id: string;
@@ -20,6 +21,8 @@ interface MealFormIngredientsProps {
 
 export const MealFormIngredients = ({value, onChange}: MealFormIngredientsProps) => {
     const nextId = useRef(value.length + 1);
+    const [defaultIngredients, setDefaultIngredients] = useState<Ingredient[]>([]);
+    const [defaultUnits, setDefaultUnits] = useState<Unit[]>([]);
 
     const isEmptyRow = (r: IngredientRow) => {
         return (!r.ingredient) && (!r.amount || r.amount.trim() === '') && (!r.unit);
@@ -84,6 +87,21 @@ export const MealFormIngredients = ({value, onChange}: MealFormIngredientsProps)
         });
     };
 
+    useEffect(() => {
+        const fetchDefaultValues = async () => {
+            try {
+                const ingredients = await httpClient.get<Ingredient[]>('/api/v1/ingredients?limit=10');
+                setDefaultIngredients(ingredients);
+
+                const units = await httpClient.get<Unit[]>('/api/v1/units?limit=10');
+                setDefaultUnits(units);
+            } catch (error) {
+                console.error("Failed to fetch default ingredients:", error);
+            }
+        };
+        fetchDefaultValues();
+    }, []);
+
     return (
         <div className="w-full bg-card p-6 rounded-3xl">
             <div className="mb-4 text-lg font-semibold">Zutaten</div>
@@ -99,7 +117,7 @@ export const MealFormIngredients = ({value, onChange}: MealFormIngredientsProps)
                 {rows.map((row) => (
                     <div key={row.id} className="grid grid-cols-[1fr_80px_100px_20px] items-center gap-4">
                         <div>
-                            <IngredientCombobox value={row.ingredient} onChange={(i) => updateRow(row.id, { ingredient: i })} />
+                            <IngredientCombobox value={row.ingredient} defaultItems={defaultIngredients} onChange={(i) => updateRow(row.id, { ingredient: i })} />
                         </div>
 
                         <div>
@@ -108,7 +126,7 @@ export const MealFormIngredients = ({value, onChange}: MealFormIngredientsProps)
                         </div>
 
                         <div>
-                            <UnitCombobox value={row.unit} onChange={(u) => updateRow(row.id, { unit: u })} />
+                            <UnitCombobox value={row.unit} defaultItems={defaultUnits} onChange={(u) => updateRow(row.id, { unit: u })} />
                         </div>
 
                         <div className="flex items-center justify-center">

@@ -25,6 +25,7 @@ interface MealPageProps {
         borderBottomRightRadius: string;
     }
     shouldClose?: boolean;
+    priority?: boolean;
 }
 
 export const MealComponent: React.FC<MealPageProps & React.HTMLAttributes<HTMLDivElement>> = ({
@@ -38,6 +39,7 @@ export const MealComponent: React.FC<MealPageProps & React.HTMLAttributes<HTMLDi
     height,
     rounded,
     shouldClose,
+    priority = false,
     className,
     ...props
 }) => {
@@ -49,24 +51,23 @@ export const MealComponent: React.FC<MealPageProps & React.HTMLAttributes<HTMLDi
     const mealRef = React.useRef<HTMLDivElement>(null);
 
     useEffect(() => {
+        const fetchMeal = async (): Promise<void> => {
+            setIsLoading(true);
+            try {
+                const data = await httpClient.get<Meal>(`/api/v1/meals/${mealId}`);
+                setMeal(data);
+
+            } catch (error) {
+                console.error('Failed to fetch meal:', error);
+            } finally {
+                setIsLoading(false);
+            }
+        }
+
         if (mealId && isAuthenticated && user) {
             fetchMeal();
         }
     }, [mealId, isAuthenticated, user]);
-
-    const fetchMeal = async (): Promise<void> => {
-        setIsLoading(true);
-        try {
-            const data = await httpClient.get<Meal>(`/api/v1/meals/${mealId}`);
-            setMeal(data);
-
-        } catch (error) {
-            console.error('Failed to fetch meal:', error);
-        } finally {
-            setIsLoading(false);
-        }
-
-    }
 
     useEffect(() => {
         if (isFullScreen) return;
@@ -108,9 +109,17 @@ export const MealComponent: React.FC<MealPageProps & React.HTMLAttributes<HTMLDi
                     className={`flex flex-col xl:flex-row xl:h-full gap-5 transition-[padding,width] duration-1000 ${isCard ? "p-0 w-full" : "p-2 sm:p-5 xl:w-[calc(100%-26.25rem)]"}`}>
                     <div
                         className={`flex flex-col gap-5 h-full shrink-0  transition-[width] w-full duration-1000`}>
-                        <MealCoverImage meal={meal} loadingImage={loadingImage} loading={isLoading} isFullScreen={isFullScreen}
-                                        description={"Hackbällchen in Tomatensauce mit Mozzarella überbacken"}
-                                        isCard={isCard}/>
+                        <MealCoverImage
+
+                            meal={meal}
+                            loading={isLoading}
+                            description={meal?.description || ""}
+                            loadingImage={loadingImage}
+                            isFullScreen={isFullScreen}
+                            isCard={isCard}
+                            priority={priority}
+                            onClick={e => e.stopPropagation()}
+                        />
                         <InstructionsCard meal={meal} loading={isLoading} className="hidden md:flex "/>
                     </div>
 

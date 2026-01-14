@@ -1,13 +1,20 @@
 import React from "react";
-import {Link, useNavigate} from "react-router-dom";
+import {Link, useNavigate, useSearchParams} from "react-router-dom";
 import {Input} from "@/components/ui/input";
 import {Button} from "@/components/ui/button";
 import {Popover, PopoverContent, PopoverTrigger} from "@/components/ui/popover";
 import {Sheet, SheetContent, SheetFooter, SheetHeader, SheetTitle, SheetTrigger,} from "@/components/ui/sheet";
-import {Search as SearchIcon, X as XIcon, Home, Grid, Plus, Settings} from "lucide-react";
+import {Carrot, Grid, Home, Plus, Search as SearchIcon, Settings, Tag, Utensils, X as XIcon} from "lucide-react";
 import {useAuth} from "@/hooks/useAuth";
 import * as SheetPrimitive from "@radix-ui/react-dialog";
 import {Separator} from "@/components/ui/separator.tsx";
+import {Client} from "@stomp/stompjs";
+
+interface SearchSuggestion {
+    text: string;
+    type: string;
+    id?: string;
+}
 
 const Navbar: React.FC = () => {
     const {user, logout, isAuthenticated} = useAuth();
@@ -19,44 +26,182 @@ const Navbar: React.FC = () => {
     const [open, setOpen] = React.useState(false);
 
     // Search state for the mobile sheet (UI/UX improvements: clear button, suggestions placeholder)
-    const [query, setQuery] = React.useState("");
+    const [searchParams] = useSearchParams();
+    const [query, setQuery] = React.useState(searchParams.get("q") || "");
+    const [isFocused, setIsFocused] = React.useState(false);
+    const [stompClient, setStompClient] = React.useState<Client | null>(null);
+    const [serverSuggestions, setServerSuggestions] = React.useState<SearchSuggestion[]>([]);
+	const [selectedIndex, setSelectedIndex] = React.useState(-1);
+
+    React.useEffect(() => {
+        if (!isAuthenticated) return;
+
+        const token = localStorage.getItem('accessToken');
+        if (!token) return;
+
+        const baseUrl = import.meta.env.VITE_SPRING_APP_API_URL || 'http://localhost:8080';
+        // Construct the WS URL manually (ws:// or wss://)
+        const wsProtocol = baseUrl.startsWith('https') ? 'wss:' : 'ws:';
+        const cleanBaseUrl = baseUrl.replace(/^https?:\/\//, '');
+        const backendUrl = `${wsProtocol}//${cleanBaseUrl}/ws-search`; // Spring Boot STOMP typical raw endpoint
+
+        // Add Token to Query Param
+        const brokerURL = `${backendUrl}?token=${token}`;
+
+        const client = new Client({
+            brokerURL: brokerURL,
+            reconnectDelay: 5000,
+            onConnect: () => {
+                console.log("Connected via Native WebSocket!");
+                setStompClient(client);
+
+                client.subscribe('/topic/suggestions', (message) => {
+                    if (message.body) {
+                        try {
+                            const results = JSON.parse(message.body);
+                            setServerSuggestions(results);
+                        } catch (e) {
+                            console.error("Failed to parse search results", e);
+                        }
+                    }
+                });
+            },
+            onStompError: (frame) => {
+                console.error('Broker reported error: ' + frame.headers['message']);
+                console.error('Additional details: ' + frame.body);
+            },
+        });
+
+        client.activate();
+
+        return () => {
+            client.deactivate();
+        };
+    }, [isAuthenticated]);
+
+    React.useEffect(() => {
+        if (!query || !stompClient || !stompClient.connected) {
+            if (!query) setServerSuggestions([]);
+            return;
+        }
+
+        const timeoutId = setTimeout(() => {
+            stompClient.publish({
+                destination: "/app/suggest",
+                body: JSON.stringify({query: query})
+            });
+        }, 50);
+
+        return () => clearTimeout(timeoutId);
+    }, [query, stompClient]);
 
     // lightweight suggestions for better UX (could be replaced with real API results)
-    const suggestions = React.useMemo(() => {
-        if (!query) return ["Pasta", "Couscous-Salat", "Chicken Curry"];
+    const suggestions = React.useMemo<SearchSuggestion[]>(() => {
+        const defaultSuggestions: SearchSuggestion[] = [
+            {text: "Pasta", type: "meal"},
+            {text: "Couscous-Salat", type: "meal"},
+            {text: "Chicken Curry", type: "meal"}
+        ];
+
+        if (!query) return defaultSuggestions;
+        if (serverSuggestions.length > 0) return serverSuggestions;
+
         const q = query.toLowerCase();
-        return ["Pasta", "Couscous-Salat", "Chicken Curry"].filter(s => s.toLowerCase().includes(q));
-    }, [query]);
+        return defaultSuggestions.filter(s => s.text.toLowerCase().includes(q));
+    }, [query, serverSuggestions]);
+
+    React.useEffect(() => {
+        setSelectedIndex(-1);
+    }, [suggestions]);
+
+    const getIconForType = (type: string) => {
+        switch (type) {
+            case 'meal':
+                return <Utensils className="h-4 w-4 text-muted-foreground"/>;
+            case 'ingredient':
+                return <Carrot className="h-4 w-4 text-muted-foreground"/>;
+            case 'tag':
+                return <Tag className="h-4 w-4 text-muted-foreground"/>;
+            default:
+                return <SearchIcon className="h-4 w-4 text-muted-foreground"/>;
+        }
+    };
 
     return (
-        <header className="w-full border-b bg-background/80 backdrop-blur-lg dark:bg-background/80 z-40 sticky top-0">
-            <div className="max-w-6xl mx-auto px-4 py-3 flex items-center gap-4">
+        <header className="w-full border-b bg-background/80 backdrop-blur-lg dark:bg-background/80 z-40">
+            <div className="mx-auto lg:px-12 px-4 py-3 flex items-center md:gap-8 gap-4 justify-between">
                 <div className="flex items-center gap-3">
                     <Link to="/" className="flex items-center gap-2">
                         <img src="/vite.svg" alt="logo" className="h-8 w-8"/>
-                        <span className="font-medium text-lg">Meal Planer</span>
+                        <span className="font-medium text-lg sm:block hidden">Meal Planer</span>
                     </Link>
                 </div>
 
                 {/* Desktop search - visible on md and up */}
-                <div className="hidden md:flex flex-1 items-center max-w-2xl">
-                    <Input
-                        placeholder="Search meals, tags, ingredients..."
-                        className="mr-3 h-9"
-                        value={query}
-                        onChange={(e) => setQuery(e.target.value)}
-                        onKeyDown={(e) => {
-                            if (e.key === 'Enter') {
-                                navigate(`/dashboard?q=${encodeURIComponent(query)}`);
-                            }
-                        }}
-                    />
-                    <Button variant="outline" onClick={() => navigate(`/dashboard?q=${encodeURIComponent(query)}`)}>
-                        Search
-                    </Button>
+                <div className="flex flex-1 items-center max-w-2xl relative">
+                    <div className="relative w-full mr-3">
+                        <Input
+                            placeholder="Search meals, tags, ingredients..."
+                            className="h-9 w-full"
+                            value={query}
+                            onChange={(e) => setQuery(e.target.value)}
+                            onFocus={() => setIsFocused(true)}
+                            onBlur={() => setTimeout(() => setIsFocused(false), 200)}
+                            onKeyDown={(e) => {
+                                if (e.key === 'ArrowDown') {
+                                    e.preventDefault();
+                                    setSelectedIndex(prev => (prev + 1) % suggestions.length);
+                                } else if (e.key === 'ArrowUp') {
+                                    e.preventDefault();
+                                    setSelectedIndex(prev => (prev - 1 + suggestions.length) % suggestions.length);
+                                } else if (e.key === 'Enter') {
+                                    e.preventDefault();
+                                    if (selectedIndex >= 0 && selectedIndex < suggestions.length) {
+                                        const s = suggestions[selectedIndex];
+                                        setQuery(s.text);
+                                        navigate(`/dashboard?q=${encodeURIComponent(s.text)}`);
+                                        setIsFocused(false);
+                                    } else {
+                                        navigate(`/dashboard?q=${encodeURIComponent(query)}`);
+                                        setIsFocused(false);
+                                    }
+                                } else if (e.key === 'Escape') {
+                                    setIsFocused(false);
+                                }
+                            }}
+                        />
+                        {isFocused && suggestions.length > 0 && (
+                            <div
+                                className="absolute top-full left-0 right-0 mt-1 bg-popover text-popover-foreground shadow-md rounded-md border z-50 max-h-[300px] overflow-y-auto">
+                                <div className="p-1">
+                                    {suggestions.map((s, i) => (
+                                        <button
+                                            key={i}
+                                            className={`w-full text-left px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground flex items-center gap-2 rounded-sm ${i === selectedIndex ? "bg-accent text-accent-foreground" : ""}`}
+                                            onClick={() => {
+                                                setQuery(s.text);
+                                                navigate(`/dashboard?q=${encodeURIComponent(s.text)}`);
+                                                setIsFocused(false);
+                                            }}
+                                            onMouseEnter={() => setSelectedIndex(i)}
+                                        >
+                                            {getIconForType(s.type)}
+                                            <span className="flex-1">{s.text}</span>
+                                            <span
+                                                className="text-xs text-muted-foreground opacity-50 capitalize">{s.type}</span>
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                    {/*<Button variant="outline" className="sm:hidden block"*/}
+                    {/*        onClick={() => navigate(`/dashboard?q=${encodeURIComponent(query)}`)}>*/}
+                    {/*    <Search/>*/}
+                    {/*</Button>*/}
                 </div>
 
-                <div className="flex items-center gap-3 ml-auto">
+                <div className="flex items-center gap-3">
                     {/* Mobile: hamburger to open sheet */}
                     <Sheet open={open} onOpenChange={setOpen}>
                         <SheetTrigger asChild>
@@ -80,9 +225,10 @@ const Navbar: React.FC = () => {
                                 </div>
 
                                 {/* small close button to the right of header for quick dismiss */}
-                                <SheetPrimitive.Close className="absolute right-4 top-1/2 -translate-y-1/2 rounded-xs hover:opacity-100 disabled:pointer-events-none">
+                                <SheetPrimitive.Close
+                                    className="absolute right-4 top-1/2 -translate-y-1/2 rounded-xs hover:opacity-100 disabled:pointer-events-none">
                                     <Button variant={"ghost"} aria-label="Close menu">
-                                        <XIcon className="size-4" />
+                                        <XIcon className="size-4"/>
                                         <span className="sr-only">Close</span>
                                     </Button>
                                 </SheetPrimitive.Close>
@@ -119,18 +265,23 @@ const Navbar: React.FC = () => {
                                     {/* Suggestions to improve discoverability */}
                                     <div className="mb-3">
                                         <div className="text-xs text-muted-foreground px-1">Suggestions</div>
-                                        <div className="mt-2 grid grid-cols-2 gap-2">
-                                            {suggestions.map((s) => (
+                                        <div className="mt-2 flex flex-col gap-1">
+                                            {suggestions.map((s, i) => (
                                                 <button
-                                                    key={s}
-                                                    className="w-full text-left px-3 py-2 rounded-md bg-transparent hover:bg-accent/5 transition text-sm"
+                                                    key={i}
+                                                    className="w-full text-left px-3 py-2 rounded-md bg-transparent hover:bg-accent/5 transition text-sm flex items-center gap-2"
                                                     onClick={() => {
-                                                        setQuery(s);
-                                                        navigate(`/dashboard?q=${encodeURIComponent(s)}`);
+                                                        setQuery(s.text);
+                                                        navigate(`/dashboard?q=${encodeURIComponent(s.text)}`);
                                                         setOpen(false);
                                                     }}
                                                 >
-                                                    {s}
+                                                    {getIconForType(s.type)}
+                                                    <div className="flex flex-col items-start leading-none gap-0.5">
+                                                        <span>{s.text}</span>
+                                                        <span
+                                                            className="text-[10px] text-muted-foreground capitalize">{s.type}</span>
+                                                    </div>
                                                 </button>
                                             ))}
                                         </div>
@@ -176,7 +327,7 @@ const Navbar: React.FC = () => {
                                                 }}
                                                 className="w-full flex items-center justify-center gap-2"
                                             >
-                                                <Plus className="size-4" />
+                                                <Plus className="size-4"/>
                                                 <span>New Meal</span>
                                             </Button>
 
@@ -188,7 +339,7 @@ const Navbar: React.FC = () => {
                                                 }}
                                                 className="w-full flex items-center justify-center gap-2"
                                             >
-                                                <Settings className="size-4" />
+                                                <Settings className="size-4"/>
                                                 <span>Settings</span>
                                             </Button>
                                         </div>
@@ -229,7 +380,7 @@ const Navbar: React.FC = () => {
                                         )}
                                     </div>
                                 </div>
-                                <Separator />
+                                <Separator/>
                                 <div
                                     className="w-full text-center text-xs text-muted-foreground">© {new Date().getFullYear()} Meal
                                     Planer

@@ -36,6 +36,8 @@ export const MealEditPage = () => {
     }
 
     return (
-        <MealForm id={mealId} mealInit={meal}/>
+        <div className="h-full overflow-y-auto">
+            <MealForm id={mealId} mealInit={meal} />
+        </div>
     )
 }

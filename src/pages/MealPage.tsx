@@ -12,7 +12,7 @@ export const MealPage = () => {
     }
 
     return (
-        <div className="flex relative overflow-y-scroll  sm:px-10 justify-center bg-accent" style={{scrollbarWidth: "none"}}>
+        <div className="flex relative h-full overflow-y-scroll  sm:px-10 justify-center bg-accent" style={{scrollbarWidth: "none"}}>
                 <MealComponent mealId={mealId} isCardInit={false} isFullScreen={true} className={"max-w-7xl overflow-visible"}/>
         </div>
 

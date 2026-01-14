@@ -17,7 +17,8 @@ const DashboardPage: React.FC = () => {
     const [filter, setFilter] = useState<MealFilter>({
         limit: 20,
         skip: 0,
-        sortBy: "INGREDIENT_MATCH"
+        sortBy: "RELEVANCE",
+        name: query || undefined,
     });
     const [showBackdrop, setShowBackdrop] = useState(false);
     const [isClosing, setIsClosing] = useState(false);
@@ -102,27 +103,28 @@ const DashboardPage: React.FC = () => {
         }, 1000);
     }
 
-    const fetchMeals = React.useCallback(async (currentFilter: MealFilter) => {
-        setLoading(true);
-        try {
-            // The user specified endpoint /api/v1/meals with POST data for filtering
-            // and response format { results: Meal[] }
-            const data = await httpClient.post<{results: Meal[]}>(`/api/v1/meals/search`, currentFilter);
-            setMeals(data.results);
-        } catch (error) {
-            console.error('Failed to fetch meals:', error);
-            // Fallback to GET if POST fails (in case the user was wrong about endpoint/method for initial load)
-            // But for now, let's trust the user instructions.
-        } finally {
-            setLoading(false);
-        }
-    }, []);
+
 
     useEffect(() => {
-        if (isAuthenticated && user) {
-            fetchMeals(filter);
-        }
-    }, [user, isAuthenticated, filter, fetchMeals]);
+        const fetchMeals = async () => {
+            if (!isAuthenticated || !user) return;
+
+            setLoading(true);
+            try {
+                // The user specified endpoint /api/v1/meals with POST data for filtering
+                // and response format { results: Meal[] }
+                const data = await httpClient.post<{ results: Meal[] }>(`/api/v1/meals/search`, filter);
+                setMeals(data.results);
+                console.log("Fetched meals:", data.results);
+            } catch (error) {
+                console.error('Failed to fetch meals:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchMeals();
+    }, [user, isAuthenticated, filter]);
 
     useEffect(() => {
         if (query !== null && query !== filter.name) {
@@ -131,53 +133,60 @@ const DashboardPage: React.FC = () => {
     }, [filter.name, query]);
 
     const handleFilterChange = (newFilter: MealFilter) => {
-        setFilter(newFilter);
+        setFilter({
+            ...newFilter,
+            name: query || undefined
+        });
     };
 
     return (
-        <div className="flex w-full min-h-screen pt-5 sm:px-5 px-2 relative">
-            <div className="hidden md:block w-80 mr-5 shrink-0 sticky top-24 h-[calc(100vh-8rem)]">
-                <MealFilterSidebar onFilterChange={handleFilterChange} className="h-full rounded-lg border" />
+        <div className="flex w-full h-full relative">
+            <div className="hidden md:block w-80 mr-5 shrink-0 sticky h-full top-0">
+                <MealFilterSidebar onFilterChange={handleFilterChange}/>
             </div>
-            <div className="flex-1">
-                <div className="grid grid-cols-[repeat(auto-fit,_minmax(300px,450px))] sm:grid-cols-[repeat(auto-fit,_minmax(330px,_1fr))] w-full  gap-5 content-baseline">
+            <div className="flex w-full h-full pt-5 sm:px-5 px-2 relative overflow-y-auto">
+                <div className="flex-1">
+                    <div className="grid grid-cols-[repeat(auto-fill,_minmax(330px,_1fr))] w-full gap-5 content-baseline">
                     {meals.map((meal, idx) => {
-                        const image = meal.images[0].srcSetArray ? meal.images[0].srcSetArray[0] : meal.images[0].thumbnail;
+                            const image = meal.images[0].srcSetArray ? meal.images[0].srcSetArray[0] : meal.images[0].thumbnail;
 
-                        return (
-                            <MealCard mealId={meal.id} title={meal.name}
-                                      description={"Hackbällchen in Tomatensauce mit Mozzarella überbacken"}
-                                      imageUrl={image.replace("360x240", "1200x675") || "src/assets/meal-placeholder.png"}
-                                      rating={meal.rating} prepTime={meal.time} key={idx}
-                                      imgRef={el => {
-                                          mealRefs.current[idx] = el
-                                      }}
-                                      handleImageClick={() => handleMealClick(idx, meal.id)}/>
-                        )
-                    })}
-                    {fakeMeal && (
-                        <>
-                            <div
-                                className={`fixed top-0 left-0 w-screen h-screen z-999 transition-[backdrop-filter,background-color] duration-300 ${showBackdrop ? "bg-[rgba(0,0,0,0.5)] backdrop-blur-md" : "bg-transparent backdrop-blur-none"}`}
-                                onClick={e => {
-                                    if (e.target === e.currentTarget) closeFakeMeal();
-                                }}
-                            >
-                                <MealComponent
-                                    mealId={fakeMeal.mealId}
-                                    loadingImage={fakeMeal.image}
-                                    top={fakeMeal.top}
-                                    left={fakeMeal.left}
-                                    width={fakeMeal.width}
-                                    height={fakeMeal.height}
-                                    rounded={fakeMeal.rounded}
-                                    shouldClose={!showBackdrop}
-                                />
+                            return (
+                                <MealCard mealId={meal.id} title={meal.name}
+                                          description={"Hackbällchen in Tomatensauce mit Mozzarella überbacken"}
+                                          imageUrl={image || "src/assets/meal-placeholder.png"}
+                                          rating={meal.rating} prepTime={meal.time} key={idx}
+                                          imgRef={el => {
+                                              mealRefs.current[idx] = el
+                                          }}
+                                          handleImageClick={() => handleMealClick(idx, meal.id)}
+                                          priority={idx < 10}/>
+                            )
+                        })}
+                        {fakeMeal && (
+                            <>
+                                <div
+                                    className={`fixed top-0 left-0 w-screen h-screen z-999 transition-[backdrop-filter,background-color] duration-300 ${showBackdrop ? "bg-[rgba(0,0,0,0.5)] backdrop-blur-md" : "bg-transparent backdrop-blur-none"}`}
+                                    onClick={e => {
+                                        if (e.target === e.currentTarget) closeFakeMeal();
+                                    }}
+                                >
+                                    <MealComponent
+                                        mealId={fakeMeal.mealId}
+                                        loadingImage={fakeMeal.image}
+                                        top={fakeMeal.top}
+                                        left={fakeMeal.left}
+                                        width={fakeMeal.width}
+                                        height={fakeMeal.height}
+                                        rounded={fakeMeal.rounded}
+                                        priority={true}
+                                        shouldClose={!showBackdrop}
+                                    />
 
-                            </div>
-                        </>
-                    )}
+                                </div>
+                            </>
+                        )}
 
+                    </div>
                 </div>
             </div>
         </div>

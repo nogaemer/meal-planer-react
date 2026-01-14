@@ -13,6 +13,7 @@ type MealCardProps = {
     prepTime: number;
     imgRef: (el: HTMLDivElement | null) => void;
     handleImageClick: () => void;
+    priority?: boolean;
 };
 
 const MealCard: React.FC<MealCardProps> = ({
@@ -23,11 +24,12 @@ const MealCard: React.FC<MealCardProps> = ({
     rating,
     prepTime,
     imgRef,
-    handleImageClick
+    handleImageClick,
+    priority = false
 }) => (
     <div className="w-full max-w-md mx-auto h-fit bg-card rounded-3xl overflow-hidden shadow-md flex flex-col"
          onClick={handleImageClick}>
-        {imageUrl && <img src={imageUrl} alt={title} className="h-40 object-cover cursor-pointer" ref={imgRef}/>}
+        {imageUrl && <img src={imageUrl} alt={title} className="h-40 object-cover cursor-pointer" ref={imgRef} fetchPriority={priority ? "high" : "auto"} loading={priority ? "eager" : "lazy"}/>}
 
         <div className="flex flex-col px-5 py-4">
             <div className="flex flex-col">

@@ -16,6 +16,7 @@ interface MealCoverImageProps {
     loading: boolean;
     isFullScreen: boolean;
     isCard: boolean;
+    priority?: boolean;
 }
 
 export const MealCoverImage: React.FC<MealCoverImageProps & React.HTMLAttributes<HTMLDivElement>> = ({
@@ -25,6 +26,7 @@ export const MealCoverImage: React.FC<MealCoverImageProps & React.HTMLAttributes
     loading,
     isFullScreen,
     isCard,
+    priority = false,
     ...props
 }) => {
     const navigate = useNavigate();
@@ -46,15 +48,18 @@ export const MealCoverImage: React.FC<MealCoverImageProps & React.HTMLAttributes
                                 src={heroSrc}
                                 alt={""}
                                 className={`w-full h-full object-cover m-auto flex border-1 border-transparent ${!hasImages ? "animate-pulse bg-muted filter brightness-20" : ""}`}
+                                fetchPriority={priority ? "high" : "auto"}
+                                loading={priority ? "eager" : "lazy"}
                             />
                             :
                             <img
-                                src={loadingImage}
-                                alt={""}
-                                className={`w-full h-full object-cover m-auto flex border-1 border-transparent ${!loadingImage ? "animate-pulse bg-muted" : ""}`}
-                            />}
-
-
+                                src={heroSrc}
+                                alt={description}
+                                className={`w-full h-full object-cover m-auto flex border-1 border-transparent ${!hasImages ? "animate-pulse bg-muted filter" : ""}`}
+                                fetchPriority={priority ? "high" : "auto"}
+                                loading={priority ? "eager" : "lazy"}
+                            />
+                        }
                     </CarouselItem>
 
                     {!(!meal || loading || meal.images.length === 0) && meal.images.slice(1).map((image, index) => (
@@ -89,7 +94,7 @@ export const MealCoverImage: React.FC<MealCoverImageProps & React.HTMLAttributes
                 <a href={`/meal/${meal?.id}/edit`}
                    className={`absolute flex top-5 right-5 justify-center items-center size-10 rounded-2xl 
                     border backdrop-blur-sm bg-background/80 transition-opacity duration-250 delay-250 ${isCard ? "pointer-events-none opacity-0" : "opacity-100"}`}
-
+                   aria-label="Edit meal"
                    onClick={(e) => {
                        e.preventDefault();
                        navigate(`/meal/${meal?.id}/edit`);
@@ -101,7 +106,9 @@ export const MealCoverImage: React.FC<MealCoverImageProps & React.HTMLAttributes
                 <Drawer>
                     <DrawerTrigger
                         className={`absolute flex lg:hidden top-5 left-5 mr-5 justify-center items-center size-10 rounded-2xl 
-                    border backdrop-blur-sm bg-background/80 transition-opacity duration-250 delay-250 ${isCard ? "pointer-events-none opacity-0" : "opacity-100"}`}>
+                    border backdrop-blur-sm bg-background/80 transition-opacity duration-250 delay-250 ${isCard ? "pointer-events-none opacity-0" : "opacity-100"}`}
+                        aria-label="Rate meal"
+                    >
                         <Star className="size-6 text-accent-foreground"/>
                     </DrawerTrigger>
                     <DrawerContent className="bg-card mx-auto w-full max-w-md">

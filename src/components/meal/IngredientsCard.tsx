@@ -118,6 +118,7 @@ const IngredientsCard: React.FC<IngredientsComponentProps & React.HTMLAttributes
                                     size="icon"
                                     className="size-8 text-accent-foreground shadow-none"
                                     onClick={() => setWantedPortions(Math.max(1, wantedPortions - 1))}
+                                    aria-label="Decrease portions"
                                 >
                                     <Minus/>
                                 </Button>
@@ -126,6 +127,7 @@ const IngredientsCard: React.FC<IngredientsComponentProps & React.HTMLAttributes
                                     size="icon"
                                     className="size-8 text-accent-foreground shadow-none"
                                     onClick={() => setWantedPortions(wantedPortions + 1)}
+                                    aria-label="Increase portions"
                                 >
                                     <Plus/>
                                 </Button>
@@ -148,6 +150,7 @@ const IngredientsCardSkeleton = () => (
                     variant="outline"
                     size="icon"
                     className="size-8 text-accent-foreground shadow-none"
+                    aria-label="Decrease portions"
                 >
                     <Minus/>
                 </Button>
@@ -155,6 +158,7 @@ const IngredientsCardSkeleton = () => (
                     variant="outline"
                     size="icon"
                     className="size-8 text-accent-foreground shadow-none"
+                    aria-label="Increase portions"
                 >
                     <Plus/>
                 </Button>

@@ -1,14 +1,9 @@
-import React, { useEffect, useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select";
+import React, {useEffect, useState} from "react";
+import {Button} from "@/components/ui/button";
+import {Input} from "@/components/ui/input";
+import {Label} from "@/components/ui/label";
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue,} from "@/components/ui/select";
+import {Accordion, AccordionContent, AccordionItem, AccordionTrigger,} from "@/components/ui/accordion"; // Ensure you have this component
 import {
     MultiSelect,
     MultiSelectContent,
@@ -17,35 +12,45 @@ import {
     MultiSelectTrigger,
     MultiSelectValue,
 } from "@/components/ui/multi-select";
-import { AsyncCombobox } from "@/components/ui/async-combobox";
-import { Badge } from "@/components/ui/badge";
-import { X } from "lucide-react";
-import type { MealFilter, Ingredient } from "@/types/meal";
-import type { UserResponse } from "@/types/auth";
-import { httpClient } from "@/services/httpClient";
-import { Checkbox } from "@/components/ui/checkbox";
+
+import {ChefHat, Clock, Filter, Star} from "lucide-react";
+import {Separator} from "@/components/ui/separator";
+import type {Ingredient, MealFilter, SortParameter} from "@/types/meal";
+import {cn} from "@/lib/utils";
+import {httpClient} from "@/services/httpClient.ts";
+import type {UserResponse} from "@/types/auth.ts";
 
 interface MealFilterSidebarProps {
     onFilterChange: (filter: MealFilter) => void;
     className?: string;
 }
 
-export const MealFilterSidebar: React.FC<MealFilterSidebarProps> = ({ onFilterChange, className }) => {
+export const MealFilterSidebar: React.FC<MealFilterSidebarProps> = ({
+    onFilterChange,
+    className
+}) => {
     const [filter, setFilter] = useState<MealFilter>({
         limit: 20,
         skip: 0,
-        sortBy: "RELEVANCE"
     });
 
-    const [selectedIngredients, setSelectedIngredients] = useState<Ingredient[]>([]);
-    const [users, setUsers] = useState<UserResponse[]>([]);
+    const [selectedIngredientIds, setSelectedIngredientIds] = useState<string[]>([]);
+    const [ingredientSearchQuery, setIngredientSearchQuery] = useState("");
+    const [availableIngredients, setAvailableIngredients] = useState<Ingredient[]>([]);
+    const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]);
+    const [userSearchQuery, setUserSearchQuery] = useState("");
+    const [availableUsers, setAvailableUsers] = useState<UserResponse[]>([]);
+
+    const [sortParameters, setSortParameters] = useState<SortParameter[]>([]); // Typed as any for brevity, use UserResponse
 
     useEffect(() => {
-        // Fetch users only
         const fetchData = async () => {
             try {
-                const usersData = await httpClient.get<UserResponse[]>('/api/v1/users');
-                setUsers(usersData);
+                const filterData = await httpClient
+                    .get<{ users: UserResponse[]; sortParameters: SortParameter[] }>('/api/v1/filters');
+
+                setSortParameters(filterData.sortParameters);
+                handleChange("sortBy", filterData.sortParameters[0]?.id);
             } catch (error) {
                 console.error("Failed to fetch filter data", error);
             }
@@ -53,151 +58,225 @@ export const MealFilterSidebar: React.FC<MealFilterSidebarProps> = ({ onFilterCh
         fetchData();
     }, []);
 
+    useEffect(() => {
+        const fetchUsers = async () => {
+            try {
+                const query = userSearchQuery ? `?name=${encodeURIComponent(userSearchQuery)}` : '';
+                const data = await httpClient.get<UserResponse[]>(`/api/v1/filters/users${query}`);
+                setAvailableUsers(data);
+            } catch (error) {
+                console.error("Failed to fetch users", error);
+            }
+        };
+        fetchUsers();
+    }, [userSearchQuery]);
+
+    useEffect(() => {
+        const fetchIngredients = async () => {
+            try {
+                const query = ingredientSearchQuery ? `?name=${encodeURIComponent(ingredientSearchQuery)}` : '';
+                const data = await httpClient.get<Ingredient[]>(`/api/v1/ingredients${query}`);
+                setAvailableIngredients(data);
+            } catch (error) {
+                console.error("Failed to fetch ingredients", error);
+            }
+        };
+        fetchIngredients();
+    }, [ingredientSearchQuery]);
+
     const handleChange = (key: keyof MealFilter, value: any) => {
-        const newFilter = { ...filter, [key]: value };
+        const newFilter = {...filter, [key]: value};
         setFilter(newFilter);
     };
 
-    const handleAddIngredient = (ingredient?: Ingredient) => {
-        if (!ingredient) return;
-        if (selectedIngredients.some(i => i.id === ingredient.id)) return;
-
-        const newSelected = [...selectedIngredients, ingredient];
-        setSelectedIngredients(newSelected);
-        handleChange("ingredients", newSelected.map(i => i.id));
-    };
-
-    const handleRemoveIngredient = (id: string) => {
-        const newSelected = selectedIngredients.filter(i => i.id !== id);
-        setSelectedIngredients(newSelected);
-        handleChange("ingredients", newSelected.map(i => i.id));
-    };
-
-    const handleApply = () => {
-        onFilterChange(filter);
-    };
-
     return (
-        <div className={`p-4 space-y-4 border-r bg-background h-full overflow-y-auto ${className}`}>
-            <h2 className="font-semibold text-lg">Filters</h2>
-
-            <div className="space-y-2">
-                <Label>Time (min)</Label>
-                <div className="flex gap-2">
-                    <Input
-                        type="number"
-                        placeholder="Min"
-                        value={filter.minTime || ""}
-                        onChange={(e) => handleChange("minTime", e.target.value ? Number(e.target.value) : undefined)}
-                    />
-                    <Input
-                        type="number"
-                        placeholder="Max"
-                        value={filter.maxTime || ""}
-                        onChange={(e) => handleChange("maxTime", e.target.value ? Number(e.target.value) : undefined)}
-                    />
+        <div className={cn("flex h-full flex-col bg-card overflow-y-auto", className)}>
+            {/* HEADER */}
+            <div className="flex items-center justify-between border-b px-4 py-3">
+                <div className="flex items-center gap-2 font-semibold">
+                    <Filter className="h-4 w-4"/>
+                    <span>Filters</span>
                 </div>
-            </div>
-
-            <div className="space-y-2">
-                <Label>Ingredients</Label>
-                <div className="flex flex-wrap gap-2 mb-2">
-                    {selectedIngredients.map(ing => (
-                        <Badge key={ing.id} variant="secondary" className="gap-1">
-                            {ing.name}
-                            <X className="h-3 w-3 cursor-pointer" onClick={() => handleRemoveIngredient(ing.id)} />
-                        </Badge>
-                    ))}
-                </div>
-                <AsyncCombobox<Ingredient>
-                    value={undefined}
-                    onChange={handleAddIngredient}
-                    fetchUrl="/api/v1/ingredients"
-                    getLabel={(i) => i.name}
-                    getValue={(i) => i.id}
-                    placeholder="Add ingredient..."
-                    searchPlaceholder="Search ingredients..."
-                    renderOption={(it) => <>{it.name}</>}
-                />
-            </div>
-
-             <div className="space-y-2">
-                <Label>Min Ingredient Match</Label>
-                <Input
-                    type="number"
-                    step="0.1"
-                    min="0"
-                    max="1"
-                    placeholder="0.0 - 1.0"
-                    value={filter.minIngredientMatch || ""}
-                    onChange={(e) => handleChange("minIngredientMatch", e.target.value ? Number(e.target.value) : undefined)}
-                />
-            </div>
-
-            <div className="space-y-2">
-                <Label>Users</Label>
-                <MultiSelect
-                    values={filter.userIds || []}
-                    onValuesChange={(values) => handleChange("userIds", values)}
+                <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 px-2 text-xs text-muted-foreground hover:text-foreground"
+                    onClick={() => {
+                        const newFilter = {limit: 20, skip: 0, sortBy: sortParameters.filter(sp => sp.selected)[0]?.id};
+                        setFilter(newFilter);
+                        setSelectedIngredientIds([]);
+                        setSelectedUserIds([]);
+                        onFilterChange(newFilter);
+                    }}
                 >
-                    <MultiSelectTrigger>
-                        <MultiSelectValue placeholder="Select users" />
-                    </MultiSelectTrigger>
-                    <MultiSelectContent>
-                        <MultiSelectGroup>
-                            {Array.isArray(users) && users.map(u => (
-                                <MultiSelectItem key={u.id} value={u.id}>
-                                    {u.name}
-                                </MultiSelectItem>
+                    Reset
+                </Button>
+            </div>
+
+            {/* SCROLLABLE FILTERS */}
+            <div className="flex-1 space-y-6 py-4 px-4">
+
+                {/* SORT BY */}
+                <div className="space-y-2">
+                    <Label className="text-xs font-medium text-muted-foreground">Sort By</Label>
+                    <Select
+                        value={filter.sortBy || sortParameters.filter(sp => sp.selected)[0]?.id}
+                        onValueChange={(val) => handleChange("sortBy", val)}
+                    >
+                        <SelectTrigger className="w-full" aria-label="Sort by">
+                            <SelectValue placeholder="Sort by..."/>
+                        </SelectTrigger>
+                        <SelectContent>
+                            {sortParameters.map((sp) => (
+                                <SelectItem key={sp.id} value={sp.id}>{sp.name}</SelectItem>
                             ))}
-                        </MultiSelectGroup>
-                    </MultiSelectContent>
-                </MultiSelect>
+                        </SelectContent>
+                    </Select>
+                </div>
+
+                <Separator/>
+
+                <Accordion type="multiple" defaultValue={["ingredients", "time", "advanced"]} className="w-full">
+
+                    {/* TIME FILTER */}
+                    <AccordionItem value="time" className="border-b-0">
+                        <AccordionTrigger className="py-2 hover:no-underline">
+                            <div className="flex items-center gap-2 text-sm">
+                                <Clock className="h-4 w-4 text-muted-foreground"/>
+                                <span>Prep Time</span>
+                            </div>
+                        </AccordionTrigger>
+                        <AccordionContent className="pt-2">
+                            <div className="flex items-center gap-2">
+                                <div className="space-y-1 flex-1">
+                                    <Label htmlFor="min-time" className="text-xs text-muted-foreground">Min (min)</Label>
+                                    <Input
+                                        id="min-time"
+                                        type="number"
+                                        placeholder="0"
+                                        className="h-8"
+                                        onChange={(e) => handleChange("minTime", e.target.value ? Number(e.target.value) : undefined)}
+                                    />
+                                </div>
+                                <span className="mt-5 text-muted-foreground">-</span>
+                                <div className="space-y-1 flex-1">
+                                    <Label htmlFor="max-time" className="text-xs text-muted-foreground">Max (min)</Label>
+                                    <Input
+                                        id="max-time"
+                                        type="number"
+                                        placeholder="60+"
+                                        className="h-8"
+                                        onChange={(e) => handleChange("maxTime", e.target.value ? Number(e.target.value) : undefined)}
+                                    />
+                                </div>
+                            </div>
+                        </AccordionContent>
+                    </AccordionItem>
+
+                    {/* INGREDIENTS FILTER */}
+                    <AccordionItem value="ingredients" className="border-b-0">
+                        <AccordionTrigger className="py-2 hover:no-underline">
+                            <div className="flex items-center gap-2 text-sm">
+                                <ChefHat className="h-4 w-4 text-muted-foreground"/>
+                                <span>Ingredients</span>
+                            </div>
+                        </AccordionTrigger>
+                        <AccordionContent className="pt-2">
+                            <div className="space-y-3">
+                                <MultiSelect
+                                    values={selectedIngredientIds}
+                                    onValuesChange={(vals) => {
+                                        setSelectedIngredientIds(vals);
+                                        handleChange("ingredients", vals);
+                                    }}
+                                >
+                                    <MultiSelectTrigger className="w-full" aria-label={"Select Ingredients"}>
+                                        <MultiSelectValue placeholder="Add ingredient..." overflowBehavior={"wrap"}/>
+                                    </MultiSelectTrigger>
+                                    <MultiSelectContent onSearch={setIngredientSearchQuery} shouldFilter={false}>
+                                        <MultiSelectGroup>
+                                            {availableIngredients.map((ing) => (
+                                                <MultiSelectItem key={ing.id} value={ing.id}>
+                                                    {ing.name}
+                                                </MultiSelectItem>
+                                            ))}
+                                        </MultiSelectGroup>
+                                    </MultiSelectContent>
+                                </MultiSelect>
+
+                                <div className="space-y-1">
+                                    <Label htmlFor="min-ingredients" className="text-xs text-muted-foreground">Min. Matched
+                                        Ingredients</Label>
+                                    <Input
+                                        id="min-ingredients"
+                                        type="number"
+                                        placeholder="1"
+                                        className="h-8"
+                                        onChange={(e) => handleChange("minIngredientMatch", e.target.value ? Number(e.target.value) : undefined)}
+                                    />
+                                </div>
+                            </div>
+                        </AccordionContent>
+                    </AccordionItem>
+
+                    {/* RATINGS & USERS */}
+                    <AccordionItem value="advanced" className="border-b-0">
+                        <AccordionTrigger className="py-2 hover:no-underline">
+                            <div className="flex items-center gap-2 text-sm">
+                                <Star className="h-4 w-4 text-muted-foreground"/>
+                                <span>Rating & Users</span>
+                            </div>
+                        </AccordionTrigger>
+                        <AccordionContent className="pt-2">
+                            <div className="space-y-4">
+                                <div className="space-y-1.5">
+                                    <Label htmlFor="min-rating" className="text-xs text-muted-foreground">Min Rating (0-5)</Label>
+                                    <Input
+                                        id="min-rating"
+                                        type="number"
+                                        max={5}
+                                        min={0}
+                                        className="h-8"
+                                        onChange={(e) => handleChange("minUserRating", e.target.value ? Number(e.target.value) : undefined)}
+                                    />
+                                </div>
+
+                                <div className="space-y-2">
+                                    <Label className="text-xs text-muted-foreground">Bewertet von</Label>
+                                    <MultiSelect
+                                        values={selectedUserIds}
+                                        onValuesChange={(vals) => {
+                                            setSelectedUserIds(vals);
+                                            handleChange("userIds", vals);
+                                        }}
+                                    >
+                                        <MultiSelectTrigger className="w-full" aria-label={"Select Users"}>
+                                            <MultiSelectValue placeholder="User auswählen..." overflowBehavior={"wrap"} />
+                                        </MultiSelectTrigger>
+                                        <MultiSelectContent onSearch={setUserSearchQuery} shouldFilter={false}>
+                                            <MultiSelectGroup>
+                                                {availableUsers.map(user => (
+                                                    <MultiSelectItem key={user.id} value={user.id}>
+                                                        {user.name}
+                                                    </MultiSelectItem>
+                                                ))}
+                                            </MultiSelectGroup>
+                                        </MultiSelectContent>
+                                    </MultiSelect>
+                                </div>
+                            </div>
+                        </AccordionContent>
+                    </AccordionItem>
+
+                </Accordion>
             </div>
 
-            <div className="space-y-2">
-                <Label>Min User Rating</Label>
-                <Input
-                    type="number"
-                    min="1"
-                    max="5"
-                    placeholder="1-5"
-                    value={filter.minUserRating || ""}
-                    onChange={(e) => handleChange("minUserRating", e.target.value ? Number(e.target.value) : undefined)}
-                />
+            {/* FOOTER ACTION */}
+            <div className="border-t p-4">
+                <Button className="w-full" onClick={() => onFilterChange(filter)}>
+                    Apply Filters
+                </Button>
             </div>
-
-            <div className="flex items-center space-x-2">
-                <Checkbox
-                    id="requireUserRatingMatch"
-                    checked={filter.requireUserRatingMatch || false}
-                    onCheckedChange={(checked) => handleChange("requireUserRatingMatch", checked)}
-                />
-                <Label htmlFor="requireUserRatingMatch">Require Rating Match</Label>
-            </div>
-
-            <div className="space-y-2">
-                <Label>Sort By</Label>
-                <Select
-                    value={filter.sortBy}
-                    onValueChange={(value) => handleChange("sortBy", value)}
-                >
-                    <SelectTrigger>
-                        <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="RELEVANCE">Relevance</SelectItem>
-                        <SelectItem value="RATING">Rating</SelectItem>
-                        <SelectItem value="TIME_ASC">Time (asc)</SelectItem>
-                        <SelectItem value="TIME_DESC">Time (desc)</SelectItem>
-                        <SelectItem value="INGREDIENT_MATCH">Ingredient Match</SelectItem>
-                        <SelectItem value="USER_AVG_RATING">User Avg Rating</SelectItem>
-                    </SelectContent>
-                </Select>
-            </div>
-
-            <Button onClick={handleApply} className="w-full">Apply Filters</Button>
         </div>
     );
 };
-
