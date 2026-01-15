@@ -1,3 +1,6 @@
+/**
+ * Step-by-step cooking instructions card component with numbered steps
+ */
 import React from "react";
 import {Card} from "@/components/ui/card.tsx";
 import {Separator} from "@/components/ui/separator.tsx";
@@ -12,6 +15,17 @@ interface InstructionComponentProps {
     loading: boolean;
 }
 
+/**
+ * InstructionCard - Displays numbered cooking instructions
+ * 
+ * Shows step-by-step cooking instructions with visual numbered badges.
+ * Each step includes an oval-shaped number indicator and instruction text.
+ * 
+ * @param {Meal|null} meal - Meal object containing instructions array
+ * @param {boolean} loading - Whether to display loading skeleton
+ * 
+ * @returns {JSX.Element} Card with numbered instruction steps
+ */
 const InstructionCard: React.FC<InstructionComponentProps & React.HTMLProps<HTMLDivElement>> = ({
     meal,
     loading,
@@ -30,13 +44,17 @@ const InstructionCard: React.FC<InstructionComponentProps & React.HTMLProps<HTML
     )
 };
 
+/**
+ * InstructionListSkeleton - Loading placeholder for instruction steps
+ * Displays 5 skeleton steps with numbered ovals and text placeholders
+ */
 const InstructionListSkeleton: React.FC = () => (
     <List className="flex flex-col gap-8">
 
         {Array.from({ length: 5 }).map((_, idx) => (
             <div className="flex w-full gap-4" key={idx}>
+                {/* Numbered oval badge */}
                 <div className="relative shrink-0 h-16 w-16 justify-center">
-                    {/*<img src="src/assets/instructions-number-bg-oval.svg" alt="oval background"/>*/}
                     <InstructionsNumberBgOval/>
                     <div className="absolute inset-0 flex items-center justify-center">
                         <span className="text-accent-foreground font-semibold text-4xl">{idx + 1}</span>
@@ -57,6 +75,16 @@ interface InstructionListProps {
     instructions: string[];
 }
 
+/**
+ * InstructionList - Renders numbered instruction steps
+ * 
+ * Each step displays:
+ * - Numbered oval badge (responsive sizing)
+ * - Instruction text
+ * 
+ * @param {string[]} instructions - Array of instruction text strings
+ * @returns {JSX.Element} List of numbered instruction steps
+ */
 const InstructionList: React.FC<InstructionListProps> = ({instructions}) => (
     <List className="flex flex-col gap-8">
 
@@ -64,8 +92,8 @@ const InstructionList: React.FC<InstructionListProps> = ({instructions}) => (
 
             return (
                 <div className="flex w-full gap-3" key={idx}>
+                    {/* Responsive numbered oval badge */}
                     <div className="relative shrink-0 sm:w-16 sm:h-16 w-12 h-12 items-center justify-center float-left">
-                        {/*<img src="src/assets/instructions-number-bg-oval.svg" alt="oval background"/>*/}
                         <InstructionsNumberBgOval className="sm:w-16 sm:h-16 w-12 h-12"/>
                         <div className="absolute inset-0 flex items-center justify-center">
                             <span className="text-accent-foreground font-semibold sm:text-4xl text-2xl">{idx + 1}</span>
