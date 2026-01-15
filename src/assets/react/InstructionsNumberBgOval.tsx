@@ -1,9 +1,20 @@
+/**
+ * SVG component displaying a rotated oval/diamond shape used as a background for instruction numbers
+ */
 import React from "react";
 
 interface InstructionsNumberBgOvalProps extends React.SVGProps<SVGSVGElement> {
+    /** Size of the SVG in pixels or CSS unit (width and height) */
     size?: number | string;
 }
 
+/**
+ * Renders an oval/diamond-shaped background for instruction step numbers.
+ * Uses CSS custom property `--color-accent` for fill color.
+ * 
+ * @param size - Size dimension for width and height (default: 64)
+ * @param props - Additional SVG element properties
+ */
 const InstructionsNumberBgOval: React.FC<InstructionsNumberBgOvalProps> = ({ size = 64, ...props }) => (
     <svg width={size} height={size} viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
         <path
