@@ -1,14 +1,27 @@
-// services/httpClient.ts
-// services/httpClient.ts
+/**
+ * HTTP client with JWT authentication, token refresh, and automatic retry.
+ * Wraps fetch API with interceptors for authorization and error handling.
+ */
 import type {AuthenticationResponse} from '../types/auth';
 
+/**
+ * HTTP client for API communication with token management.
+ * Handles authentication, token refresh, and request/response processing.
+ */
 export class HttpClient {
     private baseURL: string;
     private accessToken: string | null = null;
     private refreshToken: string | null = null;
+    /** Callback invoked when tokens are refreshed successfully */
     private onTokenRefresh?: (tokens: AuthenticationResponse) => void;
+    /** Callback invoked when authentication fails (e.g., refresh fails) */
     private onAuthError?: () => void;
 
+    /**
+     * Create HTTP client with base URL from environment or parameter.
+     * @param baseURL - Optional base URL, falls back to VITE_SPRING_APP_API_URL env var.
+     * @throws Error if no base URL is configured.
+     */
     constructor(baseURL?: string) {
         if (baseURL !== undefined && baseURL !== null) {
             this.baseURL = baseURL;
@@ -20,6 +33,13 @@ export class HttpClient {
         this.loadTokensFromStorage();
     }
 
+    /**
+     * Set JWT tokens for authentication and persist to localStorage.
+     * Pass null to clear tokens (logout).
+     * 
+     * @param accessToken - JWT access token for API requests.
+     * @param refreshToken - JWT refresh token for obtaining new access tokens.
+     */
     setTokens(accessToken: string | null, refreshToken: string | null): void {
         this.accessToken = accessToken;
         this.refreshToken = refreshToken;
@@ -33,6 +53,12 @@ export class HttpClient {
         }
     }
 
+    /**
+     * Register callbacks for token refresh and auth errors.
+     * 
+     * @param onTokenRefresh - Called when tokens are successfully refreshed.
+     * @param onAuthError - Called when auth fails (e.g., refresh token expired).
+     */
     setCallbacks(
         onTokenRefresh: (tokens: AuthenticationResponse) => void,
         onAuthError: () => void
@@ -41,11 +67,19 @@ export class HttpClient {
         this.onAuthError = onAuthError;
     }
 
+    /**
+     * Load tokens from localStorage on client initialization.
+     */
     private loadTokensFromStorage(): void {
         this.accessToken = localStorage.getItem('accessToken');
         this.refreshToken = localStorage.getItem('refreshToken');
     }
 
+    /**
+     * Attempt to refresh the access token using the refresh token.
+     * 
+     * @returns True if refresh succeeded, false otherwise.
+     */
     private async refreshAccessToken(): Promise<boolean> {
         if (!this.refreshToken) return false;
 
@@ -72,6 +106,15 @@ export class HttpClient {
         return false;
     }
 
+    /**
+     * Make an HTTP request with automatic authentication and token refresh.
+     * Automatically retries once with refreshed token on 401 response.
+     * 
+     * @param endpoint - API endpoint path (e.g., '/api/v1/meals').
+     * @param options - Fetch options (method, body, headers, etc.).
+     * @returns Parsed JSON response or text if non-JSON.
+     * @throws Error if request fails or returns non-2xx status.
+     */
     async request<T>(
         endpoint: string,
         options: RequestInit = {}
@@ -118,11 +161,23 @@ export class HttpClient {
         return response.text() as T;
     }
 
-    // Convenience methods
+    // Convenience methods for common HTTP verbs
+    
+    /**
+     * GET request shorthand.
+     * @param endpoint - API endpoint path.
+     * @returns Parsed response.
+     */
     get<T>(endpoint: string): Promise<T> {
         return this.request<T>(endpoint, { method: 'GET' });
     }
 
+    /**
+     * POST request shorthand with JSON body.
+     * @param endpoint - API endpoint path.
+     * @param data - Request body (will be JSON stringified).
+     * @returns Parsed response.
+     */
     post<T>(endpoint: string, data?: any): Promise<T> {
         return this.request<T>(endpoint, {
             method: 'POST',
@@ -130,6 +185,12 @@ export class HttpClient {
         });
     }
 
+    /**
+     * PUT request shorthand with JSON body.
+     * @param endpoint - API endpoint path.
+     * @param data - Request body (will be JSON stringified).
+     * @returns Parsed response.
+     */
     put<T>(endpoint: string, data?: any): Promise<T> {
         return this.request<T>(endpoint, {
             method: 'PUT',
@@ -137,10 +198,21 @@ export class HttpClient {
         });
     }
 
+    /**
+     * DELETE request shorthand.
+     * @param endpoint - API endpoint path.
+     * @returns Parsed response.
+     */
     delete<T>(endpoint: string): Promise<T> {
         return this.request<T>(endpoint, { method: 'DELETE' });
     }
 
+    /**
+     * PATCH request shorthand with JSON body.
+     * @param endpoint - API endpoint path.
+     * @param data - Request body (will be JSON stringified).
+     * @returns Parsed response.
+     */
     patch<T>(endpoint: string, data?: any): Promise<T> {
         return this.request<T>(endpoint, {
             method: 'PATCH',
@@ -149,4 +221,5 @@ export class HttpClient {
     }
 }
 
+/** Singleton HTTP client instance used throughout the application. */
 export const httpClient = new HttpClient();
