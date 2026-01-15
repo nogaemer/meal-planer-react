@@ -1,10 +1,23 @@
+/**
+ * MealPage - Full-screen meal detail view for individual meal items
+ */
+
 import {useNavigate, useParams} from "react-router-dom";
 import {MealComponent} from "@/components/meal/MealComponent.tsx";
 
+/**
+ * MealPage component - Displays detailed meal information in full-screen mode
+ * 
+ * Extracts mealId from URL params and renders the meal component with full details.
+ * Redirects to dashboard if mealId is missing or invalid.
+ * 
+ * @returns Full-screen meal detail view
+ */
 export const MealPage = () => {
     const {id: mealId} = useParams();
     const navigate = useNavigate()
 
+    // Validate mealId and redirect if invalid
     if (!mealId || mealId === "undefined") {
         console.log("No mealId provided")
         navigate("/dashboard")

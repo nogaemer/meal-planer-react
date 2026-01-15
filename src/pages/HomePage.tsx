@@ -1,3 +1,7 @@
+/**
+ * HomePage - Landing page showcasing app features and providing entry points for users
+ */
+
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
@@ -5,6 +9,14 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChefHat, Calendar, ShoppingCart, Star } from "lucide-react";
 
+/**
+ * HomePage component - Main landing page for the Meal Planer application
+ * 
+ * Displays a hero section with CTA buttons and a features section highlighting
+ * the core capabilities: weekly planning, recipe management, shopping lists, and ratings.
+ * 
+ * @returns Landing page with hero section, feature cards, and footer
+ */
 const HomePage: React.FC = () => {
     const navigate = useNavigate();
 
@@ -22,6 +34,7 @@ const HomePage: React.FC = () => {
                         Organize your weekly meal plans, discover new recipes, and generate shopping lists automatically.
                         Healthy eating made simple.
                     </p>
+                    {/* Primary CTAs - Navigate to dashboard or login */}
                     <div className="flex justify-center gap-4 pt-4">
                         <Button size="lg" onClick={() => navigate("/dashboard")}>
                             Get Started
@@ -32,7 +45,7 @@ const HomePage: React.FC = () => {
                     </div>
                 </section>
 
-                {/* Features Section */}
+                {/* Features Section - Highlights four core product features */}
                 <section className="py-16 px-4 bg-muted/50">
                     <div className="max-w-6xl mx-auto">
                         <h2 className="text-3xl font-bold text-center mb-12">Why Choose Meal Planer?</h2>
@@ -71,6 +84,10 @@ const HomePage: React.FC = () => {
     );
 };
 
+/**
+ * FeatureCard - Displays a single feature highlight with icon, title, and description
+ * Used in the features section to showcase app capabilities
+ */
 const FeatureCard = ({ icon, title, description }: { icon: React.ReactNode, title: string, description: string }) => (
     <Card className="border-none shadow-md bg-background">
         <CardHeader className="flex flex-col items-center text-center pb-2">
