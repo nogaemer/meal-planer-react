@@ -1,7 +1,14 @@
+/**
+ * Text input component with consistent styling and focus states
+ */
+
 import * as React from "react"
 
 import { cn } from "@/lib/utils"
 
+/**
+ * Input component with built-in validation states and focus styling
+ */
 function Input({ className, type, ...props }: React.ComponentProps<"input">) {
   return (
     <input

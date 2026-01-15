@@ -1,15 +1,25 @@
+/**
+ * Accordion components for collapsible content sections with animated expand/collapse
+ */
+
 import * as React from "react"
 import * as AccordionPrimitive from "@radix-ui/react-accordion"
 import { ChevronDownIcon } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 
+/**
+ * Root accordion container, supports single or multiple expanded items
+ */
 function Accordion({
   ...props
 }: React.ComponentProps<typeof AccordionPrimitive.Root>) {
   return <AccordionPrimitive.Root data-slot="accordion" {...props} />
 }
 
+/**
+ * Individual collapsible accordion item
+ */
 function AccordionItem({
   className,
   ...props
@@ -23,6 +33,9 @@ function AccordionItem({
   )
 }
 
+/**
+ * Clickable trigger button that toggles accordion item, includes animated chevron icon
+ */
 function AccordionTrigger({
   className,
   children,
@@ -45,6 +58,9 @@ function AccordionTrigger({
   )
 }
 
+/**
+ * Collapsible content area with smooth expand/collapse animations
+ */
 function AccordionContent({
   className,
   children,

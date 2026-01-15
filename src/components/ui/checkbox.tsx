@@ -1,9 +1,16 @@
+/**
+ * Checkbox component with checked state indicator and custom styling
+ */
+
 import * as React from "react"
 import * as CheckboxPrimitive from "@radix-ui/react-checkbox"
 import { CheckIcon } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 
+/**
+ * Checkbox input with visual check indicator and validation states
+ */
 function Checkbox({
   className,
   ...props
