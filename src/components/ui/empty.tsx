@@ -1,7 +1,13 @@
+/**
+ * Empty state component for displaying when no content is available.
+ */
 import { cva, type VariantProps } from "class-variance-authority"
 
 import { cn } from "@/lib/utils"
 
+/**
+ * Container for empty state with dashed border.
+ */
 function Empty({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
@@ -15,6 +21,9 @@ function Empty({ className, ...props }: React.ComponentProps<"div">) {
   )
 }
 
+/**
+ * Header section for empty state title and icon.
+ */
 function EmptyHeader({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
@@ -43,6 +52,10 @@ const emptyMediaVariants = cva(
   }
 )
 
+/**
+ * Icon or illustration for the empty state.
+ * @param variant - Style variant: "default" or "icon"
+ */
 function EmptyMedia({
   className,
   variant = "default",
@@ -58,6 +71,9 @@ function EmptyMedia({
   )
 }
 
+/**
+ * Title text for the empty state.
+ */
 function EmptyTitle({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
@@ -68,6 +84,9 @@ function EmptyTitle({ className, ...props }: React.ComponentProps<"div">) {
   )
 }
 
+/**
+ * Description text for the empty state.
+ */
 function EmptyDescription({ className, ...props }: React.ComponentProps<"p">) {
   return (
     <div
@@ -81,6 +100,9 @@ function EmptyDescription({ className, ...props }: React.ComponentProps<"p">) {
   )
 }
 
+/**
+ * Content section for empty state actions and additional information.
+ */
 function EmptyContent({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div

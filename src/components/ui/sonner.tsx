@@ -1,3 +1,6 @@
+/**
+ * Toast notification component with custom icons and theme support.
+ */
 import {
   CircleCheckIcon,
   InfoIcon,
@@ -8,6 +11,9 @@ import {
 import { useTheme } from "next-themes"
 import { Toaster as Sonner, type ToasterProps } from "sonner"
 
+/**
+ * Toaster component for displaying toast notifications with theme-aware styling.
+ */
 const Toaster = ({ ...props }: ToasterProps) => {
   const { theme = "system" } = useTheme()
 

@@ -1,3 +1,6 @@
+/**
+ * Multi-select combobox component with badge display and overflow handling.
+ */
 "use client"
 
 import { CheckIcon, ChevronsUpDownIcon, XIcon } from "lucide-react"
@@ -38,6 +41,12 @@ type MultiSelectContextType = {
 }
 const MultiSelectContext = createContext<MultiSelectContextType | null>(null)
 
+/**
+ * Root multi-select component managing selection state.
+ * @param values - Controlled selected values
+ * @param defaultValues - Initial selected values for uncontrolled mode
+ * @param onValuesChange - Callback when selection changes
+ */
 export function MultiSelect({
   children,
   values,
@@ -95,6 +104,9 @@ export function MultiSelect({
   )
 }
 
+/**
+ * Trigger button that opens the multi-select dropdown.
+ */
 export function MultiSelectTrigger({
   className,
   children,
@@ -124,6 +136,12 @@ export function MultiSelectTrigger({
   )
 }
 
+/**
+ * Displays selected values as badges with optional click-to-remove.
+ * @param placeholder - Text shown when no items selected
+ * @param clickToRemove - Whether clicking badges removes them
+ * @param overflowBehavior - How to handle overflow: "wrap", "wrap-when-open", or "cutoff"
+ */
 export function MultiSelectValue({
   placeholder,
   clickToRemove = true,
@@ -245,6 +263,11 @@ export function MultiSelectValue({
   )
 }
 
+/**
+ * Dropdown content with search and command items.
+ * @param search - Search configuration or boolean to enable/disable
+ * @param onSearch - Callback for custom search handling
+ */
 export function MultiSelectContent({
   search = true,
   children,
@@ -290,6 +313,10 @@ export function MultiSelectContent({
   )
 }
 
+/**
+ * Individual selectable item in the multi-select dropdown.
+ * @param badgeLabel - Custom label for the badge (defaults to children)
+ */
 export function MultiSelectItem({
   value,
   children,
@@ -323,6 +350,9 @@ export function MultiSelectItem({
   )
 }
 
+/**
+ * Group container for multi-select items with optional heading.
+ */
 export function MultiSelectGroup(
   props: ComponentPropsWithoutRef<typeof CommandGroup>,
 ) {

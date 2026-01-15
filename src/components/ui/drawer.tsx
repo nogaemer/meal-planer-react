@@ -1,32 +1,50 @@
+/**
+ * Drawer component for mobile-friendly slide-out panels with drag-to-dismiss.
+ */
 import * as React from "react"
 import { Drawer as DrawerPrimitive } from "vaul"
 
 import { cn } from "@/lib/utils"
 
+/**
+ * Root drawer component that manages state and drag interactions.
+ */
 function Drawer({
   ...props
 }: React.ComponentProps<typeof DrawerPrimitive.Root>) {
   return <DrawerPrimitive.Root data-slot="drawer" {...props} />
 }
 
+/**
+ * Trigger element that opens the drawer.
+ */
 function DrawerTrigger({
   ...props
 }: React.ComponentProps<typeof DrawerPrimitive.Trigger>) {
   return <DrawerPrimitive.Trigger data-slot="drawer-trigger" {...props} />
 }
 
+/**
+ * Portal component for rendering drawer in a different DOM location.
+ */
 function DrawerPortal({
   ...props
 }: React.ComponentProps<typeof DrawerPrimitive.Portal>) {
   return <DrawerPrimitive.Portal data-slot="drawer-portal" {...props} />
 }
 
+/**
+ * Button that closes the drawer.
+ */
 function DrawerClose({
   ...props
 }: React.ComponentProps<typeof DrawerPrimitive.Close>) {
   return <DrawerPrimitive.Close data-slot="drawer-close" {...props} />
 }
 
+/**
+ * Backdrop overlay with blur effect behind the drawer.
+ */
 function DrawerOverlay({
   className,
   ...props
@@ -43,6 +61,9 @@ function DrawerOverlay({
   )
 }
 
+/**
+ * Main drawer content container with drag handle for dismissing.
+ */
 function DrawerContent({
   className,
   children,
@@ -70,6 +91,9 @@ function DrawerContent({
   )
 }
 
+/**
+ * Header section for drawer title and description.
+ */
 function DrawerHeader({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
@@ -83,6 +107,9 @@ function DrawerHeader({ className, ...props }: React.ComponentProps<"div">) {
   )
 }
 
+/**
+ * Footer section for drawer actions.
+ */
 function DrawerFooter({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
@@ -93,6 +120,9 @@ function DrawerFooter({ className, ...props }: React.ComponentProps<"div">) {
   )
 }
 
+/**
+ * Accessible title for the drawer.
+ */
 function DrawerTitle({
   className,
   ...props
@@ -106,6 +136,9 @@ function DrawerTitle({
   )
 }
 
+/**
+ * Description text for the drawer content.
+ */
 function DrawerDescription({
   className,
   ...props

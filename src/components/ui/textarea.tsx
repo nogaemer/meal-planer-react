@@ -1,7 +1,13 @@
+/**
+ * Multi-line text input component with auto-sizing support.
+ */
 import * as React from "react"
 
 import { cn } from "@/lib/utils"
 
+/**
+ * Textarea with consistent styling and validation state support.
+ */
 function Textarea({ className, ...props }: React.ComponentProps<"textarea">) {
   return (
     <textarea
