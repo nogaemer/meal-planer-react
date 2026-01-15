@@ -126,19 +126,19 @@ src/
 
 ```bash
 # Install dependencies
-npm install
+pnpm install
 
 # Start development server (with network access)
-npm run dev
+pnpm run dev
 
 # Build for production
-npm run build
+pnpm run build
 
 # Run linter
-npm run lint
+pnpm run lint
 
 # Preview production build
-npm run preview
+pnpm run preview
 ```
 
 ## Code Quality
