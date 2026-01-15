@@ -1,9 +1,34 @@
+/**
+ * login-form.tsx - Reusable login form component with OAuth2 and email/password authentication
+ */
+
 import {cn} from "@/lib/utils"
 import {Button} from "@/components/ui/button"
 import {Card, CardContent, CardDescription, CardHeader, CardTitle,} from "@/components/ui/card"
 import {Input} from "@/components/ui/input"
 import {Label} from "@/components/ui/label"
 
+/**
+ * LoginForm component providing multiple authentication methods
+ * 
+ * This component renders a login form card with:
+ * - OAuth2 login buttons for Apple and Google
+ * - Traditional email/password login form
+ * - Sign up link for new users
+ * - Terms of Service and Privacy Policy agreement text
+ * 
+ * @param {Object} props - Component props
+ * @param {string} [props.className] - Additional CSS classes for styling
+ * @param {React.FormEventHandler<HTMLFormElement>} props.handleSubmit - Handler for email/password form submission
+ * @param {Function} props.handleOAuth2Login - Handler for OAuth2 login (receives event and provider name)
+ * @returns {JSX.Element} A styled login form card with multiple authentication options
+ * 
+ * @example
+ * <LoginForm
+ *   handleSubmit={(e) => { e.preventDefault(); // handle email login }}
+ *   handleOAuth2Login={(e, provider) => { // handle OAuth2 login }}
+ * />
+ */
 export function LoginForm({
     className,
     handleSubmit,
@@ -25,6 +50,7 @@ export function LoginForm({
                 <CardContent>
                     <form onSubmit={handleSubmit}>
                         <div className="grid gap-6">
+                            {/* OAuth2 login buttons for third-party authentication */}
                             <div className="flex flex-col gap-4">
                                 <Button variant="outline" type="button" className="w-full"
                                         onClick={(event) => handleOAuth2Login(event, "apple")}>
@@ -47,12 +73,14 @@ export function LoginForm({
                                     Login with Google
                                 </Button>
                             </div>
+                            {/* Visual divider between OAuth2 and email/password authentication */}
                             <div
                                 className="after:border-border relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t">
                                 <span className="bg-card text-muted-foreground relative z-10 px-2">
                                   Or continue with
                                 </span>
                             </div>
+                            {/* Email and password input fields for traditional authentication */}
                             <div className="grid gap-6">
                                 <div className="grid gap-3">
                                     <Label htmlFor="email">Email</Label>
