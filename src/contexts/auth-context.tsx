@@ -1,4 +1,7 @@
-// contexts/AuthContext.tsx
+/**
+ * Authentication context provider managing user auth state, login, and token refresh.
+ * Wraps the application to provide authentication throughout the component tree.
+ */
 import React, {useEffect, useState, type ReactNode } from 'react';
 import { httpClient } from '../services/httpClient';
 import { authService } from '../services/authService';
@@ -11,10 +14,26 @@ import type {
 } from '../types/auth';
 import { AuthContext } from '@/hooks/useAuth';
 
+/**
+ * Props for AuthProvider component.
+ */
 interface AuthProviderProps {
+    /** Child components to wrap with auth context */
     children: ReactNode;
 }
 
+/**
+ * Authentication provider component managing auth state and operations.
+ * Initializes auth from stored tokens, handles login/logout, and token refresh.
+ * 
+ * @param props.children - Application content to wrap with auth context.
+ * @returns Provider component wrapping children with authentication context.
+ * 
+ * @example
+ * <AuthProvider>
+ *   <App />
+ * </AuthProvider>
+ */
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const [user, setUser] = useState<UserResponse | null>(null);
     const [accessToken, setAccessToken] = useState<string | null>(null);
@@ -22,11 +41,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
     const isAuthenticated = !!user && !!accessToken;
 
-    // Initialize auth state
+    // Initialize auth state on mount from stored tokens
     useEffect(() => {
         initializeAuth();
     }, []);
 
+    /**
+     * Initialize authentication from localStorage tokens.
+     * Attempts to fetch current user if tokens exist.
+     */
     const initializeAuth = async (): Promise<void> => {
         setIsLoading(true);
 
@@ -49,18 +72,27 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         setIsLoading(false);
     };
 
-    // Set up HTTP client callbacks
+    // Set up HTTP client callbacks for token refresh and auth errors
     useEffect(() => {
         httpClient.setCallbacks(
+            // On token refresh, update access token in state
             (tokens: AuthenticationResponse) => {
                 setAccessToken(tokens.accessToken);
             },
+            // On auth error (e.g., refresh fails), logout user
             () => {
                 logout();
             }
         );
     }, []);
 
+    /**
+     * Authenticate user with credentials.
+     * On success, stores tokens and fetches user profile.
+     * 
+     * @param credentials - Username/email and password.
+     * @returns True if login succeeded, false otherwise.
+     */
     const login = async (credentials: AuthenticationRequest): Promise<boolean> => {
         try {
             const response = await authService.login(credentials);
@@ -83,10 +115,21 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         }
     };
 
+    /**
+     * Initiate OAuth2 login flow by redirecting to provider.
+     * 
+     * @param provider - OAuth provider identifier (e.g., 'google', 'github').
+     */
     const oAuth2Login = async (provider: string) => {
         await authService.oAuthLogin(provider);
     }
 
+    /**
+     * Register a new user and automatically log them in.
+     * 
+     * @param data - Registration data (name, login, password, role).
+     * @returns True if registration succeeded, false otherwise.
+     */
     const register = async (data: RegisterRequest): Promise<boolean> => {
         try {
             const response = await authService.register(data);
@@ -108,12 +151,21 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         }
     };
 
+    /**
+     * Log out the current user and clear all auth state.
+     */
     const logout = (): void => {
         httpClient.setTokens(null, null);
         setAccessToken(null);
         setUser(null);
     };
 
+    /**
+     * Manually refresh the access token.
+     * Note: This is handled automatically by httpClient; rarely needed directly.
+     * 
+     * @returns True if refresh succeeded, false otherwise.
+     */
     const refreshToken = async (): Promise<boolean> => {
         try {
             const response = await authService.refreshToken();
