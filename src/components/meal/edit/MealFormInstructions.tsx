@@ -1,3 +1,7 @@
+/**
+ * Sortable instruction steps editor with drag-and-drop and mobile-friendly controls.
+ */
+
 import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {closestCenter, DndContext, type DragEndEvent} from '@dnd-kit/core';
 import {arrayMove, SortableContext, useSortable, verticalListSortingStrategy} from '@dnd-kit/sortable';
@@ -9,6 +13,10 @@ import InstructionsNumberBgOval from "@/assets/react/InstructionsNumberBgOval.ts
 
 type Step = { id: string; text: string };
 
+/**
+ * Individual sortable instruction step with numbered badge, textarea, and control buttons.
+ * Provides drag-and-drop on desktop and up/down buttons on mobile.
+ */
 function SortableStep({
     step,
     index,
@@ -43,7 +51,7 @@ function SortableStep({
     return (
         <div ref={setNodeRef} style={style}
              className="grid grid-cols-[auto_1fr] md:flex md:items-center md:gap-4 rounded-md">
-            {/* left number badge */}
+            {/* Numbered badge on left side */}
             <div
                 className="relative shrink-0 md:h-16 md:w-16 w-8 h-8 md:p-0 p-6 justify-center row-start-1 col-start-1">
                 <InstructionsNumberBgOval className={"md:block hidden"}/>
@@ -52,7 +60,7 @@ function SortableStep({
                 </div>
             </div>
 
-            {/* center textarea */}
+            {/* Textarea for step content */}
             <div className="flex-1 h-full row-start-2 col-span-2 md:row-start-auto md:col-span-auto">
                 <Textarea
                     placeholder="Dein Rezept hier..."
@@ -62,7 +70,7 @@ function SortableStep({
                 />
             </div>
 
-            {/* buttons: Up/Down (Mobile) | Drag Handle (Desktop) | Delete (Both) */}
+            {/* Control buttons: Up/Down arrows (mobile), Drag handle (desktop), Delete (both) */}
             <div
                 className="flex flex-row md:flex-col items-center justify-end md:justify-between gap-2 row-start-1 col-start-2 md:row-start-auto md:col-start-auto md:w-12">
                 {!isPlaceholder && (
@@ -103,7 +111,7 @@ function SortableStep({
                             <GripVertical className="h-4 w-4"/>
                         </Button>
 
-                        {/* Both: Delete */}
+                        {/* Delete button (visible on all screen sizes) */}
                         <Button
                             variant="outline"
                             size="icon"
@@ -121,6 +129,7 @@ function SortableStep({
 }
 
 
+/** Ensures list always has a trailing empty step for adding new instructions */
 const ensureTrailingEmpty = (list: Step[], nextIdRef: React.MutableRefObject<number>) => {
     const last = list[list.length - 1];
     if (!last || !last.text || last.text.trim() === '') {
@@ -130,6 +139,14 @@ const ensureTrailingEmpty = (list: Step[], nextIdRef: React.MutableRefObject<num
     return [...list, {id, text: ''}];
 };
 
+/**
+ * Instructions form section with drag-and-drop reordering and dynamic step management.
+ * Automatically adds a trailing empty step and filters out empty steps on change.
+ * 
+ * @param value - Array of instruction text strings
+ * @param onChange - Callback with filtered non-empty instruction steps
+ * @returns Sortable list of instruction steps with numbered badges
+ */
 export const MealFormInstructions = ({value, onChange}: { value: string[]; onChange: (next: string[]) => void; }) => {
     const initial: Step[] = value.length > 0
         ? value.map((text, idx) => ({id: String(idx + 1), text}))
@@ -138,6 +155,7 @@ export const MealFormInstructions = ({value, onChange}: { value: string[]; onCha
     const nextIdRef = useRef(initial.length + 1);
     const [steps, setSteps] = useState<Step[]>(ensureTrailingEmpty(initial, nextIdRef));
 
+    // Sync non-empty steps back to parent
     useEffect(() => {
         onChange(steps.filter((step) => step.text.trim().length > 0).map((step) => step.text));
     }, [steps, onChange]);
@@ -154,6 +172,7 @@ export const MealFormInstructions = ({value, onChange}: { value: string[]; onCha
         }
     }, []);
 
+    /** Updates step text and adds trailing empty row if user edited the last step */
     const updateStepText = (id: string, text: string) => {
         setSteps(prev => {
             const next = prev.map(s => s.id === id ? {...s, text} : s);
@@ -165,6 +184,7 @@ export const MealFormInstructions = ({value, onChange}: { value: string[]; onCha
         })
     }
 
+    /** Removes a step unless it's the trailing empty placeholder */
     const deleteStep = (id: string) => {
         setSteps(prev => {
             const last = prev[prev.length - 1];
@@ -193,13 +213,14 @@ export const MealFormInstructions = ({value, onChange}: { value: string[]; onCha
         <div className="w-full bg-card p-6 rounded-3xl">
             <div className="mb-4 text-lg font-semibold">Zubereitungsschritte</div>
 
+            {/* Drag-and-drop context for desktop reordering */}
             <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
                 <SortableContext items={steps.map(s => s.id)} strategy={verticalListSortingStrategy}>
                     <div className="flex flex-col gap-6">
                         {steps.map((step, idx) => {
                             const isPlaceholder = idx === steps.length - 1;
                             const canMoveUp = idx > 0 && !isPlaceholder;
-                            // Can move down if it's not the last item AND not the item immediately before the placeholder
+                            // Can move down if not the last item and not immediately before placeholder
                             const canMoveDown = idx < steps.length - 2;
 
                             return (

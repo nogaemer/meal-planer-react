@@ -1,3 +1,7 @@
+/**
+ * Rating card component displaying meal ratings with average and user-specific rating interface.
+ */
+
 import React, {useEffect, useState} from "react";
 import {Card} from "@/components/ui/card.tsx";
 import {Separator} from "@/components/ui/separator.tsx";
@@ -13,6 +17,13 @@ interface RatingComponentProps {
     mealId: string | null;
 }
 
+/**
+ * Displays meal ratings including average rating and list of user ratings.
+ * Authenticated users can submit or update their own rating.
+ * 
+ * @param mealId - ID of the meal to display ratings for
+ * @returns Card with average rating, user's interactive rating, and list of all ratings
+ */
 const RatingCard: React.FC<RatingComponentProps & React.HTMLProps<HTMLDivElement>> = ({
     mealId,
     className,
@@ -25,27 +36,32 @@ const RatingCard: React.FC<RatingComponentProps & React.HTMLProps<HTMLDivElement
     const [loading, setIsLoading] = useState(true);
     const [, setIsSubmitting] = useState(false);
 
+    // Fetch ratings when meal ID changes
     useEffect(() => {
         if (mealId) {
             fetchRatings();
         } else setIsLoading(true);
     }, [mealId]);
 
+    /**
+     * Fetches ratings from API and initializes user's existing rating if found.
+     * 
+     * @param updateLoading - Whether to show loading state (default: true)
+     */
     const fetchRatings = async (updateLoading: boolean = true): Promise<void> => {
         if (updateLoading) setIsLoading(true);
         try {
             const data = await httpClient.get<RatingResponse>(`/api/v1/ratings/${mealId}`);
             setRatingsData(data);
 
-            // Find the current user's rating
+            // Find the current user's rating if authenticated
             if (user && data.ratings) {
                 const userRatingEntry = data.ratings.find(
                     r => r.user.id === user.id
                 );
                 if (userRatingEntry) {
                     setUserRating(userRatingEntry.rating.rating);
-                    // You'd need the rating ID for updates - might need to be included in response
-                    setExistingRatingId(userRatingEntry.rating.id ?? null); // Replace it with actual ID
+                    setExistingRatingId(userRatingEntry.rating.id ?? null);
                 }
             }
         } catch (error) {
@@ -55,6 +71,11 @@ const RatingCard: React.FC<RatingComponentProps & React.HTMLProps<HTMLDivElement
         }
     };
 
+    /**
+     * Submits a new rating or updates existing rating for the current user.
+     * 
+     * @param newRating - Rating value (1-5)
+     */
     const submitRating = async (newRating: number): Promise<void> => {
         if (!isAuthenticated || !user || !mealId) return;
 
@@ -66,6 +87,7 @@ const RatingCard: React.FC<RatingComponentProps & React.HTMLProps<HTMLDivElement
                 userId: user.id,
             };
 
+            // Update existing rating or create new one based on existingRatingId
             if (existingRatingId) {
                 // Update existing rating
                 await httpClient.put(`/api/v1/ratings/${existingRatingId}`, ratingData);
@@ -75,7 +97,7 @@ const RatingCard: React.FC<RatingComponentProps & React.HTMLProps<HTMLDivElement
             }
 
             setUserRating(newRating);
-            await fetchRatings(false); // Refresh data
+            await fetchRatings(false); // Refresh data without loading state
         } catch (error) {
             console.error('Failed to submit rating:', error);
         } finally {
@@ -85,6 +107,7 @@ const RatingCard: React.FC<RatingComponentProps & React.HTMLProps<HTMLDivElement
 
     return (
         <Card className={cn("py-5 px-5 pt-10 rounded-4xl w-full xl:shrink-0 xl:w-100 h-fit", className)} {...props}>
+            {/* Ratings header */}
             {loading ?
                 <Skeleton className="min-h-6"/>
                 :
@@ -93,6 +116,7 @@ const RatingCard: React.FC<RatingComponentProps & React.HTMLProps<HTMLDivElement
                 </p>
             }
             <Separator/>
+            {/* Average rating display */}
             {loading ?
                     <Skeleton className="min-h-14 rounded-2xl"/>
                     :
@@ -104,6 +128,7 @@ const RatingCard: React.FC<RatingComponentProps & React.HTMLProps<HTMLDivElement
                     </ListItems>
             }
             <Separator/>
+            {/* User rating and list of all ratings */}
             {loading ?
                     <div className="flex flex-col gap-0.5 overflow-auto">
                         <Skeleton className="min-h-14 rounded-b-md rounded-t-2xl"/>
@@ -127,12 +152,19 @@ interface RatingListProps {
     onSubmit: (rating: number) => void;
 }
 
+/**
+ * Renders the user's interactive rating row followed by other users' ratings.
+ * Applies proper border rounding based on list position.
+ */
 const RatingList: React.FC<RatingListProps> = ({ratings, user, userRating, onSubmit, existingRatingId}) => (
     <List>
+        {/* Current user's rating with interactive stars */}
         <UserRating user={user} userRating={userRating} onSubmit={onSubmit} round={ratings?.length ? "top" : "all"}
                     existingRatingId={existingRatingId}/>
 
+        {/* Other users' ratings (excluding current user) */}
         {ratings?.filter(r => r.user.id != user.id).map((rating, idx, arr) => {
+            // Apply correct border rounding based on position in list
             let round: "top" | "none" | "all" | "bottom";
             if (idx === arr.length - 1) round = "bottom";
             else round = "none";

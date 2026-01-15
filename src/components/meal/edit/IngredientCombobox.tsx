@@ -1,5 +1,9 @@
+/**
+ * Searchable combobox for selecting ingredients with async loading from API.
+ */
+
 import { AsyncCombobox } from '@/components/ui/async-combobox';
-import type {Ingredient} from '@/types/meal'; // Assuming you have this type
+import type {Ingredient} from '@/types/meal';
 import { Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -9,6 +13,14 @@ interface IngredientComboboxProps {
     defaultItems?: Ingredient[];
 }
 
+/**
+ * Ingredient selection combobox with search and async data fetching.
+ * 
+ * @param value - Currently selected ingredient
+ * @param onChange - Callback when ingredient selection changes
+ * @param defaultItems - Optional initial ingredient list to display
+ * @returns AsyncCombobox configured for ingredient selection
+ */
 export function IngredientCombobox({ value, onChange, defaultItems}: IngredientComboboxProps) {
 
     return (
