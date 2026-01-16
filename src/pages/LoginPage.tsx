@@ -1,13 +1,28 @@
+/**
+ * LoginPage - User authentication page with email/password and OAuth2 login options
+ */
+
 import {LoginForm} from "@/components/login-form.tsx";
 import React, {useEffect} from "react";
 import {Salad} from "lucide-react";
 import {useAuth} from "@/hooks/useAuth.ts";
 import {useNavigate} from "react-router-dom";
 
+/**
+ * LoginPage component - Handles user authentication with multiple login methods
+ * 
+ * Provides login form with email/password authentication and OAuth2 provider support.
+ * Automatically redirects authenticated users to the dashboard.
+ * 
+ * @returns Login page with branding and authentication form
+ */
 const LoginPage: React.FC = () => {
     const {login, oAuth2Login, isAuthenticated} = useAuth();
     const navigate = useNavigate()
 
+    /**
+     * Handles traditional email/password login form submission
+     */
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
         const formData = new FormData(event.currentTarget);
@@ -18,11 +33,15 @@ const LoginPage: React.FC = () => {
         console.log(success);
     }
 
+    /**
+     * Initiates OAuth2 authentication flow with the specified provider
+     */
     const handleOAuth2Login = async (event: React.MouseEvent<HTMLButtonElement, MouseEvent>, provider: string) => {
         event.preventDefault()
         oAuth2Login(provider);
     }
 
+    // Redirect already authenticated users to dashboard
     useEffect(() => {
         if (isAuthenticated){
             navigate("/dashboard");

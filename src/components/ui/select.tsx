@@ -1,27 +1,43 @@
+/**
+ * Select dropdown components built on Radix UI with custom styling and keyboard navigation
+ */
+
 import * as React from "react"
 import * as SelectPrimitive from "@radix-ui/react-select"
 import { CheckIcon, ChevronDownIcon, ChevronUpIcon } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 
+/**
+ * Root select component container
+ */
 function Select({
   ...props
 }: React.ComponentProps<typeof SelectPrimitive.Root>) {
   return <SelectPrimitive.Root data-slot="select" {...props} />
 }
 
+/**
+ * Group container for related select options
+ */
 function SelectGroup({
   ...props
 }: React.ComponentProps<typeof SelectPrimitive.Group>) {
   return <SelectPrimitive.Group data-slot="select-group" {...props} />
 }
 
+/**
+ * Displays the selected value in the trigger
+ */
 function SelectValue({
   ...props
 }: React.ComponentProps<typeof SelectPrimitive.Value>) {
   return <SelectPrimitive.Value data-slot="select-value" {...props} />
 }
 
+/**
+ * Trigger button that opens the select dropdown. Supports sm and default sizes.
+ */
 function SelectTrigger({
   className,
   size = "default",
@@ -48,6 +64,9 @@ function SelectTrigger({
   )
 }
 
+/**
+ * Dropdown content container with portal rendering and animations
+ */
 function SelectContent({
   className,
   children,
@@ -85,6 +104,9 @@ function SelectContent({
   )
 }
 
+/**
+ * Label for a group of select options
+ */
 function SelectLabel({
   className,
   ...props
@@ -98,6 +120,9 @@ function SelectLabel({
   )
 }
 
+/**
+ * Individual selectable option item with check indicator
+ */
 function SelectItem({
   className,
   children,
@@ -122,6 +147,9 @@ function SelectItem({
   )
 }
 
+/**
+ * Visual separator between select option groups
+ */
 function SelectSeparator({
   className,
   ...props
@@ -135,6 +163,9 @@ function SelectSeparator({
   )
 }
 
+/**
+ * Scroll up button for long select lists
+ */
 function SelectScrollUpButton({
   className,
   ...props
@@ -153,6 +184,9 @@ function SelectScrollUpButton({
   )
 }
 
+/**
+ * Scroll down button for long select lists
+ */
 function SelectScrollDownButton({
   className,
   ...props

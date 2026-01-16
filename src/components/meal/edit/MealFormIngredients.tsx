@@ -1,3 +1,7 @@
+/**
+ * Form section for managing meal ingredients with dynamic rows and auto-fetched suggestions.
+ */
+
 import {useEffect, useRef, useState} from 'react';
 import {Input} from '@/components/ui/input';
 import {Button} from '@/components/ui/button';
@@ -19,15 +23,25 @@ interface MealFormIngredientsProps {
     onChange: (rows: MealIngredient[]) => void;
 }
 
+/**
+ * Dynamic ingredient list with automatic trailing empty row for adding new entries.
+ * When an ingredient is selected, its default unit is automatically populated.
+ * 
+ * @param value - Array of meal ingredients
+ * @param onChange - Callback with filtered complete ingredients (empty rows excluded)
+ * @returns Grid-based ingredient input with ingredient, amount, unit, and delete button
+ */
 export const MealFormIngredients = ({value, onChange}: MealFormIngredientsProps) => {
     const nextId = useRef(value.length + 1);
     const [defaultIngredients, setDefaultIngredients] = useState<Ingredient[]>([]);
     const [defaultUnits, setDefaultUnits] = useState<Unit[]>([]);
 
+    /** Checks if a row is completely empty (ready for deletion or can be skipped) */
     const isEmptyRow = (r: IngredientRow) => {
         return (!r.ingredient) && (!r.amount || r.amount.trim() === '') && (!r.unit);
     };
 
+    /** Ensures there's always a trailing empty row for adding new ingredients */
     const ensureTrailingEmpty = (list: IngredientRow[]) => {
         const last = list[list.length - 1];
         if (!last || isEmptyRow(last)) {
@@ -55,6 +69,7 @@ export const MealFormIngredients = ({value, onChange}: MealFormIngredientsProps)
 
     const [rows, setRows] = useState<IngredientRow[]>(ensureTrailingEmpty(baseRows));
 
+    // Sync internal rows with parent state, filtering out incomplete entries
     useEffect(() => {
         onChange(
             rows
@@ -63,7 +78,9 @@ export const MealFormIngredients = ({value, onChange}: MealFormIngredientsProps)
         );
     }, [rows, onChange]);
 
+    /** Updates a row and auto-populates unit when ingredient is selected */
     const updateRow = (id: string, patch: Partial<IngredientRow>) => {
+        // Auto-populate unit from ingredient's default unit
         if (patch.ingredient != null){
             patch.unit = patch.ingredient.unit;
         }
@@ -71,6 +88,7 @@ export const MealFormIngredients = ({value, onChange}: MealFormIngredientsProps)
         setRows(prev => {
             const next = prev.map(r => r.id === id ? {...r, ...patch} : r);
             const editedIndex = next.findIndex(r => r.id === id);
+            // Add trailing empty row if user edited the last row
             if (editedIndex === next.length - 1 && !isEmptyRow(next[editedIndex])) {
                 return ensureTrailingEmpty(next);
             }
@@ -78,15 +96,18 @@ export const MealFormIngredients = ({value, onChange}: MealFormIngredientsProps)
         });
     };
 
+    /** Removes a row unless it's the last empty placeholder */
     const removeRow = (id: string) => {
         setRows(prev => {
             const last = prev[prev.length - 1];
+            // Prevent removing the trailing empty row
             if (last && last.id === id && isEmptyRow(last)) return prev;
             const next = prev.filter(r => r.id !== id);
             return ensureTrailingEmpty(next);
         });
     };
 
+    // Fetch default suggestions for ingredients and units on mount
     useEffect(() => {
         const fetchDefaultValues = async () => {
             try {

@@ -1,8 +1,16 @@
+/**
+ * Visual separator component for dividing content horizontally or vertically.
+ */
 import * as React from "react"
 import * as SeparatorPrimitive from "@radix-ui/react-separator"
 
 import { cn } from "@/lib/utils"
 
+/**
+ * Separator component that renders a horizontal or vertical divider line.
+ * @param orientation - Direction of the separator: "horizontal" or "vertical"
+ * @param decorative - Whether the separator is purely decorative (non-semantic)
+ */
 function Separator({
   className,
   orientation = "horizontal",

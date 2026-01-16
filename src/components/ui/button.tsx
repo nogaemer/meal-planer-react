@@ -1,3 +1,7 @@
+/**
+ * Flexible button component with multiple variants and sizes
+ */
+
 import * as React from "react"
 import {Slot} from "@radix-ui/react-slot"
 import {cva, type VariantProps} from "class-variance-authority"
@@ -41,6 +45,10 @@ const buttonVariants = cva(
     }
 )
 
+/**
+ * Button component supporting multiple variants (default, destructive, outline, ghost, link, etc.)
+ * and sizes (default, sm, lg, icon). Can render as a child component using asChild prop.
+ */
 function Button({
     className,
     variant,

@@ -1,3 +1,7 @@
+/**
+ * Main form component for creating and editing meal recipes with validation and submission logic.
+ */
+
 import React, {useCallback, useEffect, useMemo, useState} from "react";
 import {useNavigate} from "react-router-dom";
 import {toast} from "sonner";
@@ -14,6 +18,7 @@ interface MealFormProps {
     mealInit?: Meal;
 }
 
+/** Creates a default empty meal object with initial values */
 const createDefaultMeal = (): Meal => ({
     id: "",
     name: "",
@@ -32,10 +37,18 @@ const createDefaultMeal = (): Meal => ({
     notes: []
 });
 
+/** Removes empty or whitespace-only instruction steps */
 const sanitizeInstructions = (list: string[]) =>
     list.map((step) => step.trim()).filter((step) => step.length > 0);
 
 
+/**
+ * Main meal form component for creating and editing recipes.
+ * 
+ * @param id - Optional meal ID for editing existing meals
+ * @param mealInit - Optional initial meal data for editing mode
+ * @returns A comprehensive form with metadata, ingredients, instructions, and image management
+ */
 export const MealForm = ({
     id,
     mealInit,
@@ -49,6 +62,7 @@ export const MealForm = ({
         console.log(mealInit)
     }, [mealInit])
 
+    // Memoized metadata with string-converted numeric fields for form inputs
     const meta = useMemo<MealMetaDataValue>(() => ({
         name: meal.name,
         description: meal.description,
@@ -59,6 +73,7 @@ export const MealForm = ({
         tags: meal.tags
     }), [meal]);
 
+    // Partially updates meal metadata while converting string inputs to numbers
     const setMeta = useCallback((patch: Partial<MealMetaDataValue>) => {
         console.log();
         setMeal((prev: Meal) => ({
@@ -94,41 +109,53 @@ export const MealForm = ({
         setMeal(createDefaultMeal());
     }, []);
 
+    /**
+     * Validates and submits the meal form.
+     * Performs client-side validation for all required fields before API submission.
+     * Creates new meal or updates existing meal based on presence of ID.
+     */
     const handleSubmit = useCallback(async () => {
+        // Validate meal name
         const trimmedName = meal.name.trim();
         if (!trimmedName) {
             toast.error("Bitte einen Rezeptnamen angeben.");
             return;
         }
 
+        // Validate difficulty selection
         if (!meal.difficulty) {
             toast.error("Bitte eine Schwierigkeit auswählen.");
             return;
         }
 
+        // Validate time (must be positive number)
         const time = Number(meal.time);
         if (!Number.isFinite(time) || time <= 0) {
             toast.error("Bitte eine gültige Zubereitungszeit angeben.");
             return;
         }
 
+        // Validate portions (must be positive number)
         const portions = Number(meal.portions);
         if (!Number.isFinite(portions) || portions <= 0) {
             toast.error("Bitte eine gültige Portionszahl angeben.");
             return;
         }
 
+        // Validate calories (must be positive number)
         const calories = Number(meal.calories);
         if (!Number.isFinite(calories) || calories <= 0) {
             toast.error("Bitte einen gültigen Kalorienwert angeben.");
             return;
         }
 
+        // Validate at least one ingredient exists
         if (meal.ingredients.length === 0) {
             toast.error("Bitte mindestens eine Zutat hinzufügen.");
             return;
         }
 
+        // Validate at least one instruction step exists after sanitization
         const normalizedInstructions = sanitizeInstructions(meal.instructions);
         if (normalizedInstructions.length === 0) {
             toast.error("Bitte mindestens einen Schritt hinzufügen.");
@@ -152,6 +179,7 @@ export const MealForm = ({
         try {
             setIsSubmitting(true);
 
+            // Update existing meal or create new one based on presence of ID
             if (id) {
                 const meal = await httpClient.put<Meal>(`/api/v1/meals/${id}`, payload);
                 toast.success("Rezept erfolgreich aktualisiert.");
@@ -177,7 +205,9 @@ export const MealForm = ({
              style={{scrollbarWidth: "none"}}
              {...props}>
             <div className="flex flex-col w-full xl:max-w-7xl max-w-2xl gap-4">
+                {/* Header with cancel and save buttons */}
                 <MealFormHeader onCancel={handleCancel} onSubmit={handleSubmit} isSubmitting={isSubmitting}/>
+                {/* Two-column layout: metadata/instructions on left, images/ingredients on right */}
                 <div className="flex xl:flex-row flex-col gap-4 w-full">
                     <div className="flex flex-col gap-4 xl:w-2/3">
                         <MealFormMetaData value={meta} onChange={setMeta}/>

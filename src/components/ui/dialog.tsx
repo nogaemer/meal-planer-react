@@ -1,33 +1,52 @@
+/**
+ * Dialog/modal components for overlaying content with backdrop, built on Radix UI
+ */
+
 import * as React from "react"
 import * as DialogPrimitive from "@radix-ui/react-dialog"
 import { XIcon } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 
+/**
+ * Root dialog component that manages open/close state
+ */
 function Dialog({
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Root>) {
   return <DialogPrimitive.Root data-slot="dialog" {...props} />
 }
 
+/**
+ * Button or element that triggers the dialog to open
+ */
 function DialogTrigger({
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Trigger>) {
   return <DialogPrimitive.Trigger data-slot="dialog-trigger" {...props} />
 }
 
+/**
+ * Portal container for rendering dialog outside DOM hierarchy
+ */
 function DialogPortal({
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Portal>) {
   return <DialogPrimitive.Portal data-slot="dialog-portal" {...props} />
 }
 
+/**
+ * Button that closes the dialog
+ */
 function DialogClose({
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Close>) {
   return <DialogPrimitive.Close data-slot="dialog-close" {...props} />
 }
 
+/**
+ * Semi-transparent backdrop overlay behind dialog
+ */
 function DialogOverlay({
   className,
   ...props
@@ -44,6 +63,9 @@ function DialogOverlay({
   )
 }
 
+/**
+ * Main dialog content container with optional close button, centered with animations
+ */
 function DialogContent({
   className,
   children,
@@ -78,6 +100,9 @@ function DialogContent({
   )
 }
 
+/**
+ * Header section for dialog title and description
+ */
 function DialogHeader({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
@@ -88,6 +113,9 @@ function DialogHeader({ className, ...props }: React.ComponentProps<"div">) {
   )
 }
 
+/**
+ * Footer section for dialog actions and buttons
+ */
 function DialogFooter({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
@@ -101,6 +129,9 @@ function DialogFooter({ className, ...props }: React.ComponentProps<"div">) {
   )
 }
 
+/**
+ * Dialog title heading with accessibility support
+ */
 function DialogTitle({
   className,
   ...props
@@ -114,6 +145,9 @@ function DialogTitle({
   )
 }
 
+/**
+ * Dialog description text for additional context
+ */
 function DialogDescription({
   className,
   ...props

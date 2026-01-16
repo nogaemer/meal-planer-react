@@ -1,20 +1,33 @@
+/**
+ * Popover components for floating content positioned relative to a trigger element
+ */
+
 import * as React from "react"
 import * as PopoverPrimitive from "@radix-ui/react-popover"
 
 import { cn } from "@/lib/utils"
 
+/**
+ * Root popover component that manages open/close state
+ */
 function Popover({
   ...props
 }: React.ComponentProps<typeof PopoverPrimitive.Root>) {
   return <PopoverPrimitive.Root data-slot="popover" {...props} />
 }
 
+/**
+ * Button or element that triggers the popover to open
+ */
 function PopoverTrigger({
   ...props
 }: React.ComponentProps<typeof PopoverPrimitive.Trigger>) {
   return <PopoverPrimitive.Trigger data-slot="popover-trigger" {...props} />
 }
 
+/**
+ * Floating content container with portal rendering and positioning relative to trigger
+ */
 function PopoverContent({
   className,
   align = "center",
@@ -37,6 +50,9 @@ function PopoverContent({
   )
 }
 
+/**
+ * Alternative anchor element for positioning popover content
+ */
 function PopoverAnchor({
   ...props
 }: React.ComponentProps<typeof PopoverPrimitive.Anchor>) {

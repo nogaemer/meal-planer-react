@@ -1,3 +1,7 @@
+/**
+ * Interactive user rating component with hover-to-reveal star selector.
+ */
+
 import React, {useState} from "react";
 import {ListItems, ListShape, ListText} from "@/components/ui/list.tsx";
 import {Badge} from "../../ui/badge.tsx";
@@ -10,7 +14,19 @@ interface UserRatingProps {
     round: "top" | "all" | "none" | "bottom";
 }
 
+/**
+ * User rating row with animated transition between display and edit modes.
+ * On hover, displays interactive star selection. When not hovered, shows username and current rating.
+ * 
+ * @param user - User object with id and name
+ * @param userRating - Current rating value (0-5)
+ * @param existingRatingId - ID of existing rating, or null if not yet rated
+ * @param onSubmit - Callback when user selects a new rating
+ * @param round - Border rounding style based on list position
+ * @returns List item with animated toggle between static and interactive rating display
+ */
 const UserRating: React.FC<UserRatingProps> = ({user, userRating, existingRatingId, onSubmit, round}) => {
+    // Show stars immediately if user hasn't rated yet
     const [hovered, setHovered] = useState(!existingRatingId);
 
     return (
@@ -21,7 +37,7 @@ const UserRating: React.FC<UserRatingProps> = ({user, userRating, existingRating
             onMouseLeave={() => setHovered(false)}
             className="relative overflow-hidden px-0 min-h-14"
         >
-            {/* Username and rating, fade out on hover */}
+            {/* Static display: Username and rating (fades out on hover) */}
             <div
                 className={`justify-between items-center flex px-4 absolute transition-[transform, translate] duration-300 w-full
                 ${hovered || !existingRatingId ? "opacity-0 -translate-y-5 pointer-events-none" : "opacity-100 translate-y-0 pointer-events-auto"}`}
@@ -32,7 +48,7 @@ const UserRating: React.FC<UserRatingProps> = ({user, userRating, existingRating
                 </ListShape>
             </div>
 
-            {/* Stars, fade in on hover */}
+            {/* Interactive display: Clickable stars (fades in on hover) */}
             <div
                 className={`justify-between items-center flex px-4 w-full z-20 transition-[transform, translate] duration-300 
                 ${hovered || !existingRatingId ? "opacity-100 translate-y-0 pointer-events-auto" : "opacity-0 translate-y-5 pointer-events-none"}`}

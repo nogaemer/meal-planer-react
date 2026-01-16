@@ -1,3 +1,7 @@
+/**
+ * Metadata form section for basic recipe information (name, description, difficulty, time, etc.).
+ */
+
 import {Field, FieldGroup, FieldLabel, FieldLegend, FieldSet} from "@/components/ui/field";
 import {Input} from "@/components/ui/input";
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
@@ -28,10 +32,19 @@ interface MealFormMetaDataProps {
     onChange: (patch: Partial<MealMetaDataValue>) => void;
 }
 
+/**
+ * Form section for meal metadata including name, description, difficulty, time, portions, calories, and tags.
+ * Tags are fetched from the API with search functionality and debouncing.
+ * 
+ * @param value - Current metadata values
+ * @param onChange - Callback to update metadata with partial changes
+ * @returns Form fields for all meal metadata
+ */
 export const MealFormMetaData = ({value, onChange}: MealFormMetaDataProps) => {
     const [availableTags, setAvailableTags] = useState<Tag[]>([]);
     const [searchQuery, setSearchQuery] = useState("");
 
+    // Fetch tags from API with debouncing (300ms delay after user stops typing)
     useEffect(() => {
         const fetchTags = async () => {
             try {
@@ -55,6 +68,10 @@ export const MealFormMetaData = ({value, onChange}: MealFormMetaDataProps) => {
         onChange({difficulty});
     };
 
+    /**
+     * Converts selected tag IDs back to Tag objects.
+     * Preserves existing tags not in availableTags and adds new selections.
+     */
     const handleTagsChange = (newTags: string[]) => {
         // Map selected IDs back to Tag objects
         // We need to keep existing tags that might not be in availableTags (if they were already selected)
@@ -74,6 +91,7 @@ export const MealFormMetaData = ({value, onChange}: MealFormMetaDataProps) => {
         onChange({tags: updatedTags});
     };
 
+    // Merge available tags with currently selected tags for display
     const tagsToDisplay = [...availableTags];
     const availableTagIds = new Set(availableTags.map(t => t.id));
 
@@ -132,6 +150,7 @@ export const MealFormMetaData = ({value, onChange}: MealFormMetaDataProps) => {
                                     inputMode="numeric"
                                     value={value.time === "0" || value.time === "NaN" ? "" : value.time}
                                     onChange={(e) => {
+                                        // Only allow numeric input
                                         if (e.target.value === "" || /^\d+$/.test(e.target.value)) {
                                             handleInput("time")(e);
                                         }

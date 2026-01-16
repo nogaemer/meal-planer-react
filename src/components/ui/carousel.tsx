@@ -1,3 +1,6 @@
+/**
+ * Carousel component for sliding through content with keyboard and button navigation.
+ */
 import * as React from "react"
 import useEmblaCarousel, {type UseEmblaCarouselType,} from "embla-carousel-react"
 import {ArrowLeft, ArrowRight} from "lucide-react"
@@ -5,11 +8,13 @@ import {ArrowLeft, ArrowRight} from "lucide-react"
 import {cn} from "@/lib/utils"
 import {Button} from "@/components/ui/button"
 
+/** API type for programmatic carousel control */
 type CarouselApi = UseEmblaCarouselType[1]
 type UseCarouselParameters = Parameters<typeof useEmblaCarousel>
 type CarouselOptions = UseCarouselParameters[0]
 type CarouselPlugin = UseCarouselParameters[1]
 
+/** Props for configuring carousel behavior */
 type CarouselProps = {
     opts?: CarouselOptions
     plugins?: CarouselPlugin
@@ -28,6 +33,9 @@ type CarouselContextProps = {
 
 const CarouselContext = React.createContext<CarouselContextProps | null>(null)
 
+/**
+ * Hook to access carousel context for navigation and state.
+ */
 function useCarousel() {
     const context = React.useContext(CarouselContext)
 
@@ -38,6 +46,13 @@ function useCarousel() {
     return context
 }
 
+/**
+ * Root carousel component with keyboard navigation support.
+ * @param orientation - Direction of slide: "horizontal" or "vertical"
+ * @param opts - Embla carousel options for customization
+ * @param setApi - Callback to access carousel API for programmatic control
+ * @param plugins - Embla carousel plugins
+ */
 function Carousel({
     orientation = "horizontal",
     opts,
@@ -128,6 +143,9 @@ function Carousel({
     )
 }
 
+/**
+ * Container for carousel items with overflow handling.
+ */
 function CarouselContent({className, ...props}: React.ComponentProps<"div">) {
     const {carouselRef, orientation} = useCarousel()
 
@@ -149,6 +167,9 @@ function CarouselContent({className, ...props}: React.ComponentProps<"div">) {
     )
 }
 
+/**
+ * Individual carousel slide item.
+ */
 function CarouselItem({className, ...props}: React.ComponentProps<"div">) {
     // const { orientation } = useCarousel()
 
@@ -166,6 +187,9 @@ function CarouselItem({className, ...props}: React.ComponentProps<"div">) {
     )
 }
 
+/**
+ * Previous slide button, disabled when at the start.
+ */
 function CarouselPrevious({
     className,
     variant = "outlineBackground",
@@ -196,6 +220,9 @@ function CarouselPrevious({
     )
 }
 
+/**
+ * Next slide button, disabled when at the end.
+ */
 function CarouselNext({
     className,
     variant = "outlineBackground",

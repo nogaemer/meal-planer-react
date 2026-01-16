@@ -1,3 +1,6 @@
+/**
+ * Command palette component for searchable command menus and selection interfaces.
+ */
 import * as React from "react"
 import { Command as CommandPrimitive } from "cmdk"
 import { SearchIcon } from "lucide-react"
@@ -11,6 +14,9 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 
+/**
+ * Root command component container.
+ */
 function Command({
   className,
   ...props
@@ -27,6 +33,12 @@ function Command({
   )
 }
 
+/**
+ * Command menu in a dialog modal for quick actions.
+ * @param title - Dialog title for accessibility
+ * @param description - Dialog description for accessibility
+ * @param showCloseButton - Whether to show close button
+ */
 function CommandDialog({
   title = "Command Palette",
   description = "Search for a command to run...",
@@ -58,6 +70,9 @@ function CommandDialog({
   )
 }
 
+/**
+ * Search input for filtering command items.
+ */
 function CommandInput({
   className,
   ...props
@@ -80,6 +95,9 @@ function CommandInput({
   )
 }
 
+/**
+ * Scrollable list container for command items.
+ */
 function CommandList({
   className,
   ...props
@@ -96,6 +114,9 @@ function CommandList({
   )
 }
 
+/**
+ * Message shown when no command items match the search.
+ */
 function CommandEmpty({
   ...props
 }: React.ComponentProps<typeof CommandPrimitive.Empty>) {
@@ -108,6 +129,9 @@ function CommandEmpty({
   )
 }
 
+/**
+ * Group of related command items with optional heading.
+ */
 function CommandGroup({
   className,
   ...props
@@ -124,6 +148,9 @@ function CommandGroup({
   )
 }
 
+/**
+ * Visual separator between command groups.
+ */
 function CommandSeparator({
   className,
   ...props
@@ -137,6 +164,9 @@ function CommandSeparator({
   )
 }
 
+/**
+ * Selectable command item with keyboard navigation support.
+ */
 function CommandItem({
   className,
   ...props
@@ -153,6 +183,9 @@ function CommandItem({
   )
 }
 
+/**
+ * Keyboard shortcut indicator for command items.
+ */
 function CommandShortcut({
   className,
   ...props

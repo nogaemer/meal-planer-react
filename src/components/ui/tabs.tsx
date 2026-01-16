@@ -1,8 +1,15 @@
+/**
+ * Tabs components for organizing content into switchable panels using Radix UI
+ */
+
 import * as React from "react"
 import * as TabsPrimitive from "@radix-ui/react-tabs"
 
 import {cn} from "@/lib/utils"
 
+/**
+ * Root tabs container component
+ */
 function Tabs({
     className,
     ...props
@@ -16,6 +23,9 @@ function Tabs({
     )
 }
 
+/**
+ * Container for tab trigger buttons
+ */
 function TabsList({
     className,
     ...props
@@ -32,6 +42,9 @@ function TabsList({
     )
 }
 
+/**
+ * Individual tab button for switching between panels
+ */
 function TabsTrigger({
     className,
     ...props
@@ -48,6 +61,9 @@ function TabsTrigger({
     )
 }
 
+/**
+ * Content panel associated with a tab
+ */
 function TabsContent({
     className,
     ...props

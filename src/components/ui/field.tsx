@@ -1,3 +1,6 @@
+/**
+ * Form field components for structured form layouts with labels, descriptions, and errors.
+ */
 import { useMemo } from "react"
 import { cva, type VariantProps } from "class-variance-authority"
 
@@ -5,6 +8,9 @@ import { cn } from "@/lib/utils"
 import { Label } from "@/components/ui/label"
 import { Separator } from "@/components/ui/separator"
 
+/**
+ * Fieldset container for grouping related form fields.
+ */
 function FieldSet({ className, ...props }: React.ComponentProps<"fieldset">) {
   return (
     <fieldset
@@ -19,6 +25,10 @@ function FieldSet({ className, ...props }: React.ComponentProps<"fieldset">) {
   )
 }
 
+/**
+ * Legend text for a fieldset.
+ * @param variant - Style variant: "legend" or "label"
+ */
 function FieldLegend({
   className,
   variant = "legend",
@@ -39,6 +49,9 @@ function FieldLegend({
   )
 }
 
+/**
+ * Container for grouping multiple fields together.
+ */
 function FieldGroup({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
@@ -76,6 +89,10 @@ const fieldVariants = cva(
   }
 )
 
+/**
+ * Individual form field with flexible layout.
+ * @param orientation - Layout direction: "vertical", "horizontal", or "responsive"
+ */
 function Field({
   className,
   orientation = "vertical",
@@ -92,6 +109,9 @@ function Field({
   )
 }
 
+/**
+ * Container for field input and related content.
+ */
 function FieldContent({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
@@ -105,6 +125,9 @@ function FieldContent({ className, ...props }: React.ComponentProps<"div">) {
   )
 }
 
+/**
+ * Label for form field with automatic focus behavior.
+ */
 function FieldLabel({
   className,
   ...props
@@ -123,6 +146,9 @@ function FieldLabel({
   )
 }
 
+/**
+ * Title text for a field without label semantics.
+ */
 function FieldTitle({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
@@ -136,6 +162,9 @@ function FieldTitle({ className, ...props }: React.ComponentProps<"div">) {
   )
 }
 
+/**
+ * Descriptive text providing additional context for a field.
+ */
 function FieldDescription({ className, ...props }: React.ComponentProps<"p">) {
   return (
     <p
@@ -151,6 +180,9 @@ function FieldDescription({ className, ...props }: React.ComponentProps<"p">) {
   )
 }
 
+/**
+ * Visual separator between fields with optional label.
+ */
 function FieldSeparator({
   children,
   className,
@@ -181,6 +213,10 @@ function FieldSeparator({
   )
 }
 
+/**
+ * Error message display for form fields with support for multiple errors.
+ * @param errors - Array of error objects with message properties
+ */
 function FieldError({
   className,
   children,

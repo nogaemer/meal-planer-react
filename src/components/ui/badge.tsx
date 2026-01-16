@@ -1,3 +1,7 @@
+/**
+ * Badge component for displaying status indicators, labels, or counts
+ */
+
 import * as React from "react"
 import { Slot } from "@radix-ui/react-slot"
 import { cva, type VariantProps } from "class-variance-authority"
@@ -25,6 +29,9 @@ const badgeVariants = cva(
   }
 )
 
+/**
+ * Badge component with variants (default, secondary, destructive, outline). Supports asChild rendering.
+ */
 function Badge({
   className,
   variant,

@@ -1,3 +1,7 @@
+/**
+ * Navbar.tsx - Application navigation bar with real-time search and authentication
+ */
+
 import React from "react";
 import {Link, useNavigate, useSearchParams} from "react-router-dom";
 import {Input} from "@/components/ui/input";
@@ -10,29 +14,53 @@ import * as SheetPrimitive from "@radix-ui/react-dialog";
 import {Separator} from "@/components/ui/separator.tsx";
 import {Client} from "@stomp/stompjs";
 
+/**
+ * Structure for search suggestions received from WebSocket or generated locally
+ */
 interface SearchSuggestion {
     text: string;
     type: string;
     id?: string;
 }
 
+/**
+ * Navbar component providing responsive navigation, real-time search, and user authentication UI
+ * 
+ * Features include:
+ * - Real-time search with WebSocket-powered suggestions for meals, ingredients, and tags
+ * - Responsive design with desktop search bar and mobile sheet menu
+ * - Keyboard navigation support (Arrow keys, Enter, Escape) for search suggestions
+ * - User authentication status display with login/logout functionality
+ * - Navigation links to Dashboard, Settings, and quick actions
+ * 
+ * @returns {JSX.Element} A responsive navigation header with search and authentication
+ * 
+ * @example
+ * <Navbar />
+ */
 const Navbar: React.FC = () => {
     const {user, logout, isAuthenticated} = useAuth();
     const navigate = useNavigate();
 
+    // Extract user initials from name for avatar display (max 2 characters)
     const initials = (user?.name ?? "U").split(" ").map(s => s[0]).slice(0, 2).join("");
 
-    // Controlled open state so we can close the sheet when a link/button is clicked
+    // Controlled open state for mobile sheet menu
     const [open, setOpen] = React.useState(false);
 
-    // Search state for the mobile sheet (UI/UX improvements: clear button, suggestions placeholder)
+    // Search state management
     const [searchParams] = useSearchParams();
     const [query, setQuery] = React.useState(searchParams.get("q") || "");
     const [isFocused, setIsFocused] = React.useState(false);
     const [stompClient, setStompClient] = React.useState<Client | null>(null);
     const [serverSuggestions, setServerSuggestions] = React.useState<SearchSuggestion[]>([]);
-	const [selectedIndex, setSelectedIndex] = React.useState(-1);
+	const [selectedIndex, setSelectedIndex] = React.useState(-1); // For keyboard navigation in suggestions
 
+    /**
+     * WebSocket connection setup for real-time search suggestions
+     * Establishes STOMP client connection with authentication token
+     * Subscribes to /topic/suggestions for receiving search results
+     */
     React.useEffect(() => {
         if (!isAuthenticated) return;
 
@@ -40,12 +68,12 @@ const Navbar: React.FC = () => {
         if (!token) return;
 
         const baseUrl = import.meta.env.VITE_SPRING_APP_API_URL || 'http://localhost:8080';
-        // Construct the WS URL manually (ws:// or wss://)
+        // Construct the WebSocket URL with appropriate protocol (ws:// or wss://)
         const wsProtocol = baseUrl.startsWith('https') ? 'wss:' : 'ws:';
         const cleanBaseUrl = baseUrl.replace(/^https?:\/\//, '');
-        const backendUrl = `${wsProtocol}//${cleanBaseUrl}/ws-search`; // Spring Boot STOMP typical raw endpoint
+        const backendUrl = `${wsProtocol}//${cleanBaseUrl}/ws-search`;
 
-        // Add Token to Query Param
+        // Include authentication token as query parameter
         const brokerURL = `${backendUrl}?token=${token}`;
 
         const client = new Client({
@@ -55,6 +83,7 @@ const Navbar: React.FC = () => {
                 console.log("Connected via Native WebSocket!");
                 setStompClient(client);
 
+                // Subscribe to suggestion topic to receive real-time search results
                 client.subscribe('/topic/suggestions', (message) => {
                     if (message.body) {
                         try {
@@ -74,17 +103,24 @@ const Navbar: React.FC = () => {
 
         client.activate();
 
+        // Cleanup: deactivate WebSocket connection on unmount
         return () => {
             client.deactivate();
         };
     }, [isAuthenticated]);
 
+    /**
+     * Debounced search query publisher
+     * Sends search queries to the backend via WebSocket after a short delay
+     * Clears server suggestions when query is empty
+     */
     React.useEffect(() => {
         if (!query || !stompClient || !stompClient.connected) {
             if (!query) setServerSuggestions([]);
             return;
         }
 
+        // Debounce search requests by 50ms to reduce server load
         const timeoutId = setTimeout(() => {
             stompClient.publish({
                 destination: "/app/suggest",
@@ -95,7 +131,10 @@ const Navbar: React.FC = () => {
         return () => clearTimeout(timeoutId);
     }, [query, stompClient]);
 
-    // lightweight suggestions for better UX (could be replaced with real API results)
+    /**
+     * Memoized search suggestions with fallback to default suggestions
+     * Prioritizes server suggestions, then filters default suggestions by query
+     */
     const suggestions = React.useMemo<SearchSuggestion[]>(() => {
         const defaultSuggestions: SearchSuggestion[] = [
             {text: "Pasta", type: "meal"},
@@ -110,10 +149,16 @@ const Navbar: React.FC = () => {
         return defaultSuggestions.filter(s => s.text.toLowerCase().includes(q));
     }, [query, serverSuggestions]);
 
+    // Reset selected index when suggestions change
     React.useEffect(() => {
         setSelectedIndex(-1);
     }, [suggestions]);
 
+    /**
+     * Returns appropriate icon component based on suggestion type
+     * @param {string} type - The type of search result (meal, ingredient, tag)
+     * @returns {JSX.Element} Icon component for the given type
+     */
     const getIconForType = (type: string) => {
         switch (type) {
             case 'meal':
@@ -137,7 +182,7 @@ const Navbar: React.FC = () => {
                     </Link>
                 </div>
 
-                {/* Desktop search - visible on md and up */}
+                {/* Desktop search bar with real-time suggestions and keyboard navigation */}
                 <div className="flex flex-1 items-center max-w-2xl relative">
                     <div className="relative w-full mr-3">
                         <Input
@@ -146,16 +191,20 @@ const Navbar: React.FC = () => {
                             value={query}
                             onChange={(e) => setQuery(e.target.value)}
                             onFocus={() => setIsFocused(true)}
-                            onBlur={() => setTimeout(() => setIsFocused(false), 200)}
+                            onBlur={() => setTimeout(() => setIsFocused(false), 200)} // Delay to allow click events
                             onKeyDown={(e) => {
+                                // Keyboard navigation: Arrow Down - move to next suggestion
                                 if (e.key === 'ArrowDown') {
                                     e.preventDefault();
                                     setSelectedIndex(prev => (prev + 1) % suggestions.length);
+                                // Keyboard navigation: Arrow Up - move to previous suggestion
                                 } else if (e.key === 'ArrowUp') {
                                     e.preventDefault();
                                     setSelectedIndex(prev => (prev - 1 + suggestions.length) % suggestions.length);
+                                // Execute search on Enter key
                                 } else if (e.key === 'Enter') {
                                     e.preventDefault();
+                                    // Navigate to selected suggestion or raw query
                                     if (selectedIndex >= 0 && selectedIndex < suggestions.length) {
                                         const s = suggestions[selectedIndex];
                                         setQuery(s.text);
@@ -165,11 +214,13 @@ const Navbar: React.FC = () => {
                                         navigate(`/dashboard?q=${encodeURIComponent(query)}`);
                                         setIsFocused(false);
                                     }
+                                // Close suggestions dropdown on Escape
                                 } else if (e.key === 'Escape') {
                                     setIsFocused(false);
                                 }
                             }}
                         />
+                        {/* Dropdown suggestions panel with clickable and keyboard-navigable items */}
                         {isFocused && suggestions.length > 0 && (
                             <div
                                 className="absolute top-full left-0 right-0 mt-1 bg-popover text-popover-foreground shadow-md rounded-md border z-50 max-h-[300px] overflow-y-auto">
@@ -202,7 +253,7 @@ const Navbar: React.FC = () => {
                 </div>
 
                 <div className="flex items-center gap-3">
-                    {/* Mobile: hamburger to open sheet */}
+                    {/* Mobile navigation: Sheet drawer with menu, search, and user info */}
                     <Sheet open={open} onOpenChange={setOpen}>
                         <SheetTrigger asChild>
                             <Button variant="ghost" className="md:hidden" aria-label="Open menu">
@@ -236,7 +287,7 @@ const Navbar: React.FC = () => {
 
                             <div className="px-4 py-3 flex flex-col justify-between gap-4 h-full overflow-y-auto">
                                 <div>
-                                    {/* Enhanced search bar: larger touch target, subtle bg, clear button */}
+                                    {/* Mobile search bar with icon and action button */}
                                     <div className="relative mb-3">
                                         <SearchIcon className="absolute left-3 top-3 text-muted-foreground size-4"/>
                                         <Input
@@ -253,7 +304,7 @@ const Navbar: React.FC = () => {
                                             variant="outline"
                                             className="absolute right-2 top-2.5 h-6"
                                             onClick={() => {
-                                                // For now just navigate to search page with query param
+                                                // Navigate to dashboard with search query parameter
                                                 navigate(`/dashboard?q=${encodeURIComponent(query)}`);
                                                 setOpen(false);
                                             }}
@@ -262,7 +313,7 @@ const Navbar: React.FC = () => {
                                         </Button>
                                     </div>
 
-                                    {/* Suggestions to improve discoverability */}
+                                    {/* Search suggestions list for mobile with type icons */}
                                     <div className="mb-3">
                                         <div className="text-xs text-muted-foreground px-1">Suggestions</div>
                                         <div className="mt-2 flex flex-col gap-1">
@@ -287,7 +338,7 @@ const Navbar: React.FC = () => {
                                         </div>
                                     </div>
 
-                                    {/* Navigation: larger tappable rows with icons and clear affordance */}
+                                    {/* Mobile navigation links with icons and descriptions */}
                                     <nav className="flex flex-col gap-2">
                                         <Button asChild variant="ghost" className="justify-start rounded-md px-0">
                                             <Link to="/" onClick={() => setOpen(false)}
@@ -317,6 +368,7 @@ const Navbar: React.FC = () => {
                                         </Button>
                                     </nav>
 
+                                    {/* Quick action buttons for common tasks */}
                                     <div className="pt-3 border-t mt-3">
                                         <div className="text-xs text-muted-foreground">Quick actions</div>
                                         <div className="mt-3 space-y-2">
@@ -345,11 +397,9 @@ const Navbar: React.FC = () => {
                                         </div>
                                     </div>
                                 </div>
-
-                                {/* Account row: prominent login/logout and user info */}
-
                             </div>
 
+                            {/* Mobile sheet footer with user profile, auth status, and login/logout */}
                             <SheetFooter className="border-t py-3 bg-background/50">
                                 <div className="flex items-center gap-3 px-4">
                                     <div
@@ -389,7 +439,7 @@ const Navbar: React.FC = () => {
                         </SheetContent>
                     </Sheet>
 
-                    {/* Desktop actions */}
+                    {/* Desktop navigation: Dashboard link and user profile popover */}
                     <div className="hidden md:flex items-center gap-3">
                         <Button variant="ghost" asChild>
                             <Link to="/dashboard">Dashboard</Link>

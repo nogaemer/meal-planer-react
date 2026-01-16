@@ -1,8 +1,15 @@
+/**
+ * Label component for form fields with accessibility support
+ */
+
 import * as React from "react"
 import * as LabelPrimitive from "@radix-ui/react-label"
 
 import { cn } from "@/lib/utils"
 
+/**
+ * Label component that pairs with form inputs, supports disabled states
+ */
 function Label({
   className,
   ...props

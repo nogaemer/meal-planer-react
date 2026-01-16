@@ -1,3 +1,6 @@
+/**
+ * List components with custom shapes and styling for meal planner UI.
+ */
 import * as React from "react"
 import {cva, type VariantProps} from "class-variance-authority"
 import maskLeftUrl from "@/assets/list-shape-exclude.svg";
@@ -7,7 +10,11 @@ import maskRightUrl from "@/assets/list-shape-exclude-flipped.svg";
 import {cn} from "@/lib/utils"
 import ListShapeStar from "@/assets/react/ListShapeStar.tsx";
 
-
+/**
+ * Decorative shape container for list text labels.
+ * @param shape - Shape style: "pill" or "star"
+ * @param classNameShape - Additional classes for the shape SVG
+ */
 function ListShape({
     className,
     classNameShape = "",
@@ -63,6 +70,10 @@ const listTextVariants = cva(
     }
 )
 
+/**
+ * Styled text for list labels.
+ * @param color - Text color variant: "green" or "white"
+ */
 function ListText({
     className,
     color,
@@ -95,6 +106,10 @@ const listItemVariants = cva(
     }
 )
 
+/**
+ * Individual list item with rounded styling.
+ * @param round - Border radius position: "top", "bottom", "all", or "none"
+ */
 function ListItems({
     className,
     round,
@@ -110,6 +125,9 @@ function ListItems({
     )
 }
 
+/**
+ * Container for a vertical list of items.
+ */
 function List({className, ...props}: React.ComponentProps<"div">) {
     return (
         <div

@@ -1,3 +1,7 @@
+/**
+ * Image management component with upload, preview, and deletion functionality.
+ */
+
 import {FieldGroup, FieldLegend, FieldSet} from "@/components/ui/field.tsx";
 import {type ChangeEvent, useEffect, useRef, useState} from "react";
 import {
@@ -20,19 +24,27 @@ interface MealFormImageContainerProps {
     onChange: (next: Image[]) => void;
 }
 
+/**
+ * Image container for meal form with thumbnail carousel, main preview, and upload dialog.
+ * Handles file upload with Base64 encoding and image deletion via delete URLs.
+ * 
+ * @param images - Array of meal images with srcSet and thumbnail URLs
+ * @param onChange - Callback to update parent with new image array
+ * @returns Image preview carousel, main display, and management dialog
+ */
 export const MealFormImageContainer = ({images, onChange}: MealFormImageContainerProps) => {
     const [selectedIndex, setSelectedIndex] = useState(0);
     const fileInputRef = useRef<HTMLInputElement | null>(null);
     const [dialogOpen, setDialogOpen] = useState(false);
     const [thumbLoaded, setThumbLoaded] = useState<Record<number, boolean>>({});
 
+    // Adjust selected index if it's out of bounds after image deletion
     useEffect(() => {
         if (selectedIndex >= images.length) {
             setSelectedIndex(Math.max(0, images.length - 1));
         }
     }, [images, selectedIndex]);
-
-
+    /** Converts a File object to Base64 string for API upload */
     async function fileToBase64String(file: File): Promise<string> {
         return await new Promise((resolve, reject) => {
             const reader = new FileReader();
@@ -46,12 +58,16 @@ export const MealFormImageContainer = ({images, onChange}: MealFormImageContaine
         });
     }
 
+    /** Uploads selected files to server and adds them to the image list */
     const onAddFiles = async (e: ChangeEvent<HTMLInputElement>) => {
         const files = e.target.files;
         if (!files || files.length === 0) return;
 
+        // Convert all files to Base64
         const base64s = await Promise.all(Array.from(files).map(fileToBase64String));
         const uploaded: Image[] = [];
+        
+        // Upload each image to the server
         for (const data of base64s) {
             const image = await httpClient.post<Image>(`/api/v1/images/upload`, {base64: data});
             uploaded.push(image);
@@ -63,7 +79,9 @@ export const MealFormImageContainer = ({images, onChange}: MealFormImageContaine
     };
 
 
+    /** Removes an image and calls its delete URLs for cleanup */
     const removeImage = (index: number) => {
+        // Call delete URLs to clean up server-side resources
         images[index].deleteUrls?.forEach(
             async (url) => await fetch(url)
         )
@@ -82,7 +100,7 @@ export const MealFormImageContainer = ({images, onChange}: MealFormImageContaine
                         <FieldLegend>Bilder</FieldLegend>
                         <FieldGroup>
                             <div className="w-full">
-                                {/* Main preview */}
+                                {/* Main image preview */}
                                 <div className="mb-4 w-full rounded-xl overflow-hidden">
                                     {images && images.length > 0 ? (
                                         <img
@@ -91,10 +109,6 @@ export const MealFormImageContainer = ({images, onChange}: MealFormImageContaine
                                             className="w-full h-64 object-cover"
                                         />
                                     ) : (
-                                        // <div
-                                        //     className="w-full h-64 flex items-center justify-center text-muted-foreground">
-                                        //     Kein Bild
-                                        // </div>
                                         <Empty className="border-2 border-dashed rounded-xl">
                                             <EmptyHeader>
                                                 <EmptyMedia variant="icon">
@@ -115,12 +129,13 @@ export const MealFormImageContainer = ({images, onChange}: MealFormImageContaine
                                     )}
                                 </div>
 
-                                {/* Thumbnails row */}
+                                {/* Thumbnail carousel with horizontal scroll */}
                                 <div className="flex items-center gap-3">
                                     {images.length > 0 && <div
                                         className="flex gap-3 overflow-x-auto overflow-y-hidden rounded-lg"
                                         onWheel={(e) => {
                                             const el = e.currentTarget as HTMLDivElement;
+                                            // Enable vertical scroll wheel to scroll horizontally
                                             if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
                                                 el.scrollBy({left: e.deltaY!, behavior: "smooth"});
                                                 e.preventDefault();
@@ -135,6 +150,7 @@ export const MealFormImageContainer = ({images, onChange}: MealFormImageContaine
                                                 className={`w-20 h-20 shrink-0 rounded-lg overflow-hidden border ${selectedIndex === idx ? 'border-primary' : 'border-transparent'} p-0`}
                                             >
                                                 <div className="w-full h-full relative">
+                                                    {/* Loading spinner while thumbnail loads */}
                                                     {!thumbLoaded[idx] && (
                                                         <div
                                                             className="absolute inset-0 flex items-center justify-center bg-white/30">
@@ -162,7 +178,7 @@ export const MealFormImageContainer = ({images, onChange}: MealFormImageContaine
                                         ))}
                                     </div>}
 
-                                    {/* Add tile opens dialog */}
+                                    {/* Add button to open management dialog */}
                                     <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
                                         <DialogTrigger asChild className="cursor-pointer">
                                             <Button type="button" variant="dashed"
@@ -175,6 +191,7 @@ export const MealFormImageContainer = ({images, onChange}: MealFormImageContaine
                                             <DialogDescription className="mb-4">Hier kannst du Bilder hinzufügen oder
                                                 entfernen.</DialogDescription>
 
+                                            {/* Image grid in dialog for upload and deletion */}
                                             <div className="grid grid-cols-4 gap-3">
                                                 <div className="mb-4">
                                                     <input

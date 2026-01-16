@@ -1,3 +1,6 @@
+/**
+ * Async combobox component for searchable select with remote data fetching.
+ */
 import {useEffect, useRef, useState} from 'react';
 import {Button} from '@/components/ui/button';
 import {Check, ChevronsUpDown} from 'lucide-react';
@@ -6,6 +9,10 @@ import {Popover, PopoverContent, PopoverTrigger,} from '@/components/ui/popover'
 import {Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList,} from "@/components/ui/command";
 import {httpClient} from '@/services/httpClient';
 
+/**
+ * Props for AsyncCombobox component.
+ * @template T - Type of the items in the combobox
+ */
 export interface AsyncComboboxProps<T> {
     value?: T;
     onChange: (value?: T) => void;
@@ -20,6 +27,15 @@ export interface AsyncComboboxProps<T> {
     emptyMessage?: string;
 }
 
+/**
+ * Combobox with async data fetching and debounced search.
+ * @template T - Type of items in the dropdown
+ * @param fetchUrl - API endpoint to fetch items from
+ * @param getLabel - Function to extract display label from item
+ * @param getValue - Function to extract unique value from item
+ * @param renderOption - Optional custom renderer for dropdown items
+ * @param limit - Maximum number of items to fetch
+ */
 export function AsyncCombobox<T>({
     value,
     onChange,
