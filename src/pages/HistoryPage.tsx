@@ -5,6 +5,7 @@
 import React from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useCookHistory } from '@/hooks/useCookHistory';
+import { useHistoryStats } from '@/hooks/useHistoryStats';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
@@ -30,6 +31,9 @@ const HistoryPage: React.FC = () => {
     const userId = user?.id || '';
     const { history, isLoading, hasMore, error, loadMore } = useCookHistory(userId, 20);
 
+    // Calculate statistics using the custom hook
+    const stats = useHistoryStats(history);
+
     // Format date for display
     const formatDate = (isoDateTime: string) => {
         try {
@@ -38,41 +42,6 @@ const HistoryPage: React.FC = () => {
             return isoDateTime;
         }
     };
-
-    // Calculate basic statistics
-    const stats = React.useMemo(() => {
-        if (history.length === 0) {
-            return {
-                totalMeals: 0,
-                avgRating: 0,
-                mostCooked: null,
-            };
-        }
-
-        const totalMeals = history.length;
-        const ratingsCount = history.filter((h) => h.rating).length;
-        const avgRating =
-            ratingsCount > 0
-                ? history.reduce((sum, h) => sum + (h.rating || 0), 0) / ratingsCount
-                : 0;
-
-        // Find most cooked meal
-        const mealCounts: Record<string, { name: string; count: number }> = {};
-        history.forEach((entry) => {
-            if (!mealCounts[entry.mealId]) {
-                mealCounts[entry.mealId] = { name: entry.mealName, count: 0 };
-            }
-            mealCounts[entry.mealId].count++;
-        });
-
-        const mostCooked = Object.values(mealCounts).sort((a, b) => b.count - a.count)[0];
-
-        return {
-            totalMeals,
-            avgRating,
-            mostCooked,
-        };
-    }, [history]);
 
     return (
         <div className="container mx-auto py-6 px-4 space-y-6">

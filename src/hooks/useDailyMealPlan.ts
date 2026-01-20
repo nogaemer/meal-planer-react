@@ -137,10 +137,10 @@ export function useDailyMealPlan(userId: string): UseDailyMealPlanReturn {
         await fetchMealPlan();
     }, [fetchMealPlan]);
 
-    // Initial fetch on mount or when userId changes
+    // Initial fetch on mount
     useEffect(() => {
         fetchMealPlan();
-    }, [userId, fetchMealPlan]);
+    }, [fetchMealPlan]);
 
     // Poll for updates every 5 minutes to catch auto-completed plans,
     // but pause polling when the tab is not visible to reduce unnecessary calls.
