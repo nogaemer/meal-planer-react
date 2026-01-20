@@ -184,6 +184,7 @@ export const TodaysMealWidget: React.FC<TodaysMealWidgetProps> = ({
                                 className="h-10 w-10"
                                 title="Change meal"
                                 aria-label="Change meal"
+                                aria-label="Change meal"
                             >
                                 <X className="h-4 w-4" />
                             </Button>
