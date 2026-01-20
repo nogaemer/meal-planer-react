@@ -10,6 +10,9 @@ import {httpClient} from "@/services/httpClient.ts";
 import {useNavigate, useSearchParams} from "react-router-dom";
 import MealCard from "@/components/meal/MealCard.tsx";
 import {MealFilterSidebar} from "@/components/meal/MealFilterSidebar.tsx";
+import {TodaysMealWidget} from "@/components/meal/TodaysMealWidget.tsx";
+import {MarkMealDialog} from "@/components/meal/MarkMealDialog.tsx";
+import {useDailyMealPlan} from "@/hooks/useDailyMealPlan.ts";
 
 /**
  * DashboardPage component - Main browsing interface for meal discovery
@@ -41,6 +44,11 @@ const DashboardPage: React.FC = () => {
     });
     const [showBackdrop, setShowBackdrop] = useState(false);
     const [isClosing, setIsClosing] = useState(false);
+    
+    // Daily meal plan state
+    const userId = user?.userId || '';
+    const { mealPlan, isLoading: planLoading, markMealForToday, clearMealPlan, completeMealPlan } = useDailyMealPlan(userId);
+    const [showMarkDialog, setShowMarkDialog] = useState(false);
     // Modal animation state - stores position, dimensions, and styling for smooth card-to-modal transition
     const [fakeMeal, setFakeMeal] = useState<{
         index: number;
@@ -182,7 +190,16 @@ const DashboardPage: React.FC = () => {
             </div>
             {/* Main content area with responsive meal grid */}
             <div className="flex w-full h-full pt-5 sm:px-5 px-2 relative overflow-y-auto">
-                <div className="flex-1">
+                <div className="flex-1 space-y-5">
+                    {/* Today's meal widget */}
+                    <TodaysMealWidget
+                        mealPlan={mealPlan}
+                        isLoading={planLoading}
+                        onMarkComplete={completeMealPlan}
+                        onClear={clearMealPlan}
+                        onSelectMeal={() => setShowMarkDialog(true)}
+                    />
+
                     <div className="grid grid-cols-[repeat(auto-fill,_minmax(330px,_1fr))] w-full gap-5 content-baseline">
                     {/* Meal cards grid - each card stores ref for modal animation */}
                     {meals.map((meal, idx) => {
@@ -227,6 +244,13 @@ const DashboardPage: React.FC = () => {
                     </div>
                 </div>
             </div>
+
+            {/* Mark meal dialog */}
+            <MarkMealDialog
+                isOpen={showMarkDialog}
+                onClose={() => setShowMarkDialog(false)}
+                onMealSelected={markMealForToday}
+            />
         </div>
     );
 }
