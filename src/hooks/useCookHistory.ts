@@ -94,6 +94,7 @@ export function useCookHistory(
     // Initial fetch on mount or when userId changes
     useEffect(() => {
         refresh();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [userId]); // Only depend on userId to avoid infinite loops
 
     return {

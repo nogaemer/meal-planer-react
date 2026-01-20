@@ -2,7 +2,7 @@
  * HistoryPage - View all cooking history with tabs for different views.
  * Displays history entries in a grid with optional statistics.
  */
-import React, { useState } from 'react';
+import React from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useCookHistory } from '@/hooks/useCookHistory';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -27,7 +27,7 @@ import { Link } from 'react-router-dom';
  */
 const HistoryPage: React.FC = () => {
     const { user } = useAuth();
-    const userId = user?.userId || '';
+    const userId = user?.id || '';
     const { history, isLoading, hasMore, error, loadMore } = useCookHistory(userId, 20);
 
     // Format date for display

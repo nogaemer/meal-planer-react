@@ -46,7 +46,7 @@ const DashboardPage: React.FC = () => {
     const [isClosing, setIsClosing] = useState(false);
     
     // Daily meal plan state
-    const userId = user?.userId || '';
+    const userId = user?.id || '';
     const { mealPlan, isLoading: planLoading, markMealForToday, clearMealPlan, completeMealPlan } = useDailyMealPlan(userId);
     const [showMarkDialog, setShowMarkDialog] = useState(false);
     // Modal animation state - stores position, dimensions, and styling for smooth card-to-modal transition

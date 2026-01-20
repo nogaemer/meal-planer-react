@@ -59,6 +59,7 @@ export const MarkMealDialog: React.FC<MarkMealDialogProps> = ({
         if (isOpen) {
             fetchMeals();
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isOpen]);
 
     // Fetch meals from API
@@ -97,6 +98,7 @@ export const MarkMealDialog: React.FC<MarkMealDialogProps> = ({
         }, 300);
 
         return () => clearTimeout(timer);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [searchQuery, isOpen]);
 
     // Handle meal selection

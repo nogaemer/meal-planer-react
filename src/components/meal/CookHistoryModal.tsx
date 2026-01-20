@@ -72,6 +72,7 @@ export const CookHistoryModal: React.FC<CookHistoryModalProps> = ({
             setCurrentPage(0);
             setHasMore(false);
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isOpen, mealId]);
 
     // Fetch page of history
