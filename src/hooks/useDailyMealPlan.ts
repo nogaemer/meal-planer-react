@@ -142,13 +142,51 @@ export function useDailyMealPlan(userId: string): UseDailyMealPlanReturn {
         fetchMealPlan();
     }, [userId, fetchMealPlan]);
 
-    // Poll for updates every 5 minutes to catch auto-completed plans
+    // Poll for updates every 5 minutes to catch auto-completed plans,
+    // but pause polling when the tab is not visible to reduce unnecessary calls.
     useEffect(() => {
-        const interval = setInterval(() => {
-            fetchMealPlan();
-        }, 5 * 60 * 1000); // 5 minutes
+        // In non-browser environments (e.g. SSR), skip setting up polling.
+        if (typeof document === 'undefined') {
+            return;
+        }
 
-        return () => clearInterval(interval);
+        let intervalId: number | undefined;
+
+        const startPolling = () => {
+            if (intervalId !== undefined) {
+                window.clearInterval(intervalId);
+            }
+
+            intervalId = window.setInterval(() => {
+                // Only fetch when the document is visible.
+                if (document.visibilityState === 'visible') {
+                    fetchMealPlan();
+                }
+            }, 5 * 60 * 1000); // 5 minutes
+        };
+
+        const handleVisibilityChange = () => {
+            if (document.visibilityState === 'visible') {
+                // When the tab becomes visible, refresh immediately and resume polling.
+                fetchMealPlan();
+                startPolling();
+            } else if (intervalId !== undefined) {
+                // Pause polling while the tab is hidden.
+                window.clearInterval(intervalId);
+                intervalId = undefined;
+            }
+        };
+
+        // Start polling when the hook mounts.
+        startPolling();
+        document.addEventListener('visibilitychange', handleVisibilityChange);
+
+        return () => {
+            if (intervalId !== undefined) {
+                window.clearInterval(intervalId);
+            }
+            document.removeEventListener('visibilitychange', handleVisibilityChange);
+        };
     }, [fetchMealPlan]);
 
     return {

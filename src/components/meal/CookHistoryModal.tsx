@@ -2,7 +2,7 @@
  * Modal displaying cooking history for a specific meal.
  * Shows list of times the meal was cooked with ratings and notes.
  */
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
     Dialog,
     DialogContent,
@@ -62,21 +62,8 @@ export const CookHistoryModal: React.FC<CookHistoryModalProps> = ({
 
     const pageSize = 10;
 
-    // Fetch history when modal opens
-    useEffect(() => {
-        if (isOpen) {
-            fetchHistory(0);
-        } else {
-            // Reset state when closed
-            setHistory([]);
-            setCurrentPage(0);
-            setHasMore(false);
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [isOpen, mealId]);
-
     // Fetch page of history
-    const fetchHistory = async (page: number) => {
+    const fetchHistory = useCallback(async (page: number) => {
         try {
             setIsLoading(true);
             setError(null);
@@ -97,7 +84,19 @@ export const CookHistoryModal: React.FC<CookHistoryModalProps> = ({
         } finally {
             setIsLoading(false);
         }
-    };
+    }, [mealId, pageSize]);
+
+    // Fetch history when modal opens
+    useEffect(() => {
+        if (isOpen) {
+            fetchHistory(0);
+        } else {
+            // Reset state when closed
+            setHistory([]);
+            setCurrentPage(0);
+            setHasMore(false);
+        }
+    }, [isOpen, fetchHistory]);
 
     // Load next page
     const loadMore = () => {

@@ -192,6 +192,12 @@ const HistoryPage: React.FC = () => {
 
                 {/* Statistics Tab */}
                 <TabsContent value="stats" className="space-y-6">
+                    {history.length > 0 && (
+                        <div className="rounded-lg border bg-muted/30 p-4 text-sm text-muted-foreground">
+                            <p>Statistics are based on currently loaded history entries. Load more entries for more accurate statistics.</p>
+                        </div>
+                    )}
+                    
                     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                         {/* Total meals cooked */}
                         <Card>

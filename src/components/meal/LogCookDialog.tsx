@@ -174,7 +174,6 @@ export const LogCookDialog: React.FC<LogCookDialogProps> = ({
                                     <SelectItem value="small">Small (1 serving)</SelectItem>
                                     <SelectItem value="medium">Medium (2 servings)</SelectItem>
                                     <SelectItem value="large">Large (3+ servings)</SelectItem>
-                                    <SelectItem value="custom">Custom</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>

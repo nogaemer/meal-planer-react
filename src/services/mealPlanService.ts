@@ -15,18 +15,18 @@ export class MealPlanService {
      * 
      * @param mealId - Unique meal identifier
      * @param mealName - Name of the meal
-     * @param imageUrl - URL of the meal image (nullable)
+     * @param mealImageUrl - URL of the meal image (nullable)
      * @returns Created or updated meal plan entry
      */
     async markMealForToday(
         mealId: string,
         mealName: string,
-        imageUrl: string | null
+        mealImageUrl: string | null
     ): Promise<DailyMealPlanDto> {
         return httpClient.post<DailyMealPlanDto>('/api/v1/meal-plan/mark', {
             mealId,
             mealName,
-            imageUrl,
+            mealImageUrl,
         });
     }
 
@@ -39,13 +39,15 @@ export class MealPlanService {
     async getTodaysMealPlan(): Promise<DailyMealPlanDto | null> {
         try {
             return await httpClient.get<DailyMealPlanDto>('/api/v1/meal-plan/today');
-        } catch (error: any) {
-            // Return null if no plan exists (404) or other errors
-            if (error?.message?.includes('404')) {
+        } catch (error: unknown) {
+            // Return null only if no plan exists (HTTP 404); rethrow other errors
+            const message =
+                error instanceof Error ? error.message : String(error);
+            if (message.startsWith('HTTP 404')) {
                 return null;
             }
             console.error('Error fetching meal plan:', error);
-            return null;
+            throw error;
         }
     }
 

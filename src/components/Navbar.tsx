@@ -8,7 +8,7 @@ import {Input} from "@/components/ui/input";
 import {Button} from "@/components/ui/button";
 import {Popover, PopoverContent, PopoverTrigger} from "@/components/ui/popover";
 import {Sheet, SheetContent, SheetFooter, SheetHeader, SheetTitle, SheetTrigger,} from "@/components/ui/sheet";
-import {Carrot, Grid, Home, Plus, Search as SearchIcon, Settings, Tag, Utensils, X as XIcon} from "lucide-react";
+import {Carrot, Grid, History, Home, Plus, Search as SearchIcon, Settings, Tag, Utensils, X as XIcon} from "lucide-react";
 import {useAuth} from "@/hooks/useAuth";
 import * as SheetPrimitive from "@radix-ui/react-dialog";
 import {Separator} from "@/components/ui/separator.tsx";
@@ -361,7 +361,7 @@ const Navbar: React.FC = () => {
                                         <Button asChild variant="ghost" className="justify-start rounded-md px-0">
                                             <Link to="/history" onClick={() => setOpen(false)}
                                                   className="w-full flex items-center gap-3 text-left px-3 py-3 text-sm text-foreground hover:bg-accent/5 transition rounded-md">
-                                                <Utensils className="size-5 text-muted-foreground"/>
+                                                <History className="size-5 text-muted-foreground"/>
                                                 <span className="flex-1">History</span>
                                                 <span className="text-xs text-muted-foreground">Cooking log</span>
                                             </Link>

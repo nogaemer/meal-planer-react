@@ -2,7 +2,7 @@
  * Dialog for selecting a meal to cook today from user's meal library.
  * Displays meals in a grid with search functionality.
  */
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
     Dialog,
     DialogContent,
@@ -50,22 +50,14 @@ export const MarkMealDialog: React.FC<MarkMealDialogProps> = ({
     isLoading = false,
 }) => {
     const [meals, setMeals] = useState<Meal[]>([]);
-    const [fetchLoading, setFetchLoading] = useState(true);
+    const [isFetchingMeals, setIsFetchingMeals] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
     const [error, setError] = useState<string | null>(null);
 
-    // Fetch meals when dialog opens
-    useEffect(() => {
-        if (isOpen) {
-            fetchMeals();
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [isOpen]);
-
     // Fetch meals from API
-    const fetchMeals = async () => {
+    const fetchMeals = useCallback(async () => {
         try {
-            setFetchLoading(true);
+            setIsFetchingMeals(true);
             setError(null);
 
             const filter = {
@@ -85,9 +77,16 @@ export const MarkMealDialog: React.FC<MarkMealDialogProps> = ({
             console.error('Error fetching meals:', err);
             setError(err?.message || 'Failed to load meals');
         } finally {
-            setFetchLoading(false);
+            setIsFetchingMeals(false);
         }
-    };
+    }, [searchQuery]);
+
+    // Fetch meals when dialog opens
+    useEffect(() => {
+        if (isOpen) {
+            fetchMeals();
+        }
+    }, [isOpen, fetchMeals]);
 
     // Handle search with debouncing
     useEffect(() => {
@@ -98,8 +97,7 @@ export const MarkMealDialog: React.FC<MarkMealDialogProps> = ({
         }, 300);
 
         return () => clearTimeout(timer);
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [searchQuery, isOpen]);
+    }, [searchQuery, isOpen, fetchMeals]);
 
     // Handle meal selection
     const handleMealClick = async (meal: Meal) => {
@@ -133,7 +131,7 @@ export const MarkMealDialog: React.FC<MarkMealDialogProps> = ({
 
                 {/* Meals grid */}
                 <ScrollArea className="h-[400px] w-full">
-                    {fetchLoading ? (
+                    {isFetchingMeals ? (
                         <div className="flex items-center justify-center py-12">
                             <Spinner />
                         </div>
