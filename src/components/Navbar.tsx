@@ -8,7 +8,7 @@ import {Input} from "@/components/ui/input";
 import {Button} from "@/components/ui/button";
 import {Popover, PopoverContent, PopoverTrigger} from "@/components/ui/popover";
 import {Sheet, SheetContent, SheetFooter, SheetHeader, SheetTitle, SheetTrigger,} from "@/components/ui/sheet";
-import {Carrot, Grid, Home, Plus, Search as SearchIcon, Settings, Tag, Utensils, X as XIcon} from "lucide-react";
+import {Carrot, Grid, History, Home, Plus, Search as SearchIcon, Settings, Tag, Utensils, X as XIcon} from "lucide-react";
 import {useAuth} from "@/hooks/useAuth";
 import * as SheetPrimitive from "@radix-ui/react-dialog";
 import {Separator} from "@/components/ui/separator.tsx";
@@ -359,6 +359,15 @@ const Navbar: React.FC = () => {
                                         </Button>
 
                                         <Button asChild variant="ghost" className="justify-start rounded-md px-0">
+                                            <Link to="/history" onClick={() => setOpen(false)}
+                                                  className="w-full flex items-center gap-3 text-left px-3 py-3 text-sm text-foreground hover:bg-accent/5 transition rounded-md">
+                                                <History className="size-5 text-muted-foreground"/>
+                                                <span className="flex-1">History</span>
+                                                <span className="text-xs text-muted-foreground">Cooking log</span>
+                                            </Link>
+                                        </Button>
+
+                                        <Button asChild variant="ghost" className="justify-start rounded-md px-0">
                                             <Link to="/meal/6710be8fa96fc13495b30e0d" onClick={() => setOpen(false)}
                                                   className="w-full flex items-center gap-3 text-left px-3 py-3 text-sm text-foreground hover:bg-accent/5 transition rounded-md">
                                                 <Grid className="size-5 text-muted-foreground"/>
@@ -443,6 +452,10 @@ const Navbar: React.FC = () => {
                     <div className="hidden md:flex items-center gap-3">
                         <Button variant="ghost" asChild>
                             <Link to="/dashboard">Dashboard</Link>
+                        </Button>
+                        
+                        <Button variant="ghost" asChild>
+                            <Link to="/history">History</Link>
                         </Button>
 
                         <Popover>

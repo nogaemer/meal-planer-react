@@ -19,6 +19,7 @@ const HomePage = lazy(() => import('@/pages/HomePage.tsx'));
 const DashboardPage = lazy(() => import('@/pages/DashboardPage.tsx'));
 const LoginPage = lazy(() => import('@/pages/LoginPage.tsx'));
 const AuthCallbackPage = lazy(() => import("@/pages/AuthCallbackPage.tsx"));
+const HistoryPage = lazy(() => import('@/pages/HistoryPage.tsx'));
 const MealPage = lazy(() => import("./pages/MealPage").then(module => ({ default: module.MealPage })));
 const MealEditPage = lazy(() => import("@/pages/MealEditPage.tsx").then(module => ({ default: module.MealEditPage })));
 const MealCreatePage = lazy(() => import("@/pages/MealCreatePage.tsx").then(module => ({ default: module.MealCreatePage })));
@@ -54,6 +55,7 @@ function App() {
                                 {/* Routes with MainLayout (navbar, etc.) */}
                                 <Route element={<MainLayout />}>
                                     <Route path="/dashboard" element={<DashboardPage/>}/>
+                                    <Route path="/history" element={<HistoryPage/>}/>
                                     <Route path="/meal/:id" element={<MealPage/>}/>
                                     <Route path="/meal/:id/edit" element={<MealEditPage/>}/>
                                     <Route path="/meal/new" element={<MealCreatePage/>}/>
