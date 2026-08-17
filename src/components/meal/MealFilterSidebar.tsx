@@ -20,11 +20,22 @@ import {cn} from "@/lib/utils";
 import {httpClient} from "@/services/httpClient.ts";
 import type {UserResponse} from "@/types/auth.ts";
 
+/**
+ * Props for the meal filter sidebar.
+ * @param onFilterChange Callback invoked with the assembled filter when the user applies or resets filters.
+ * @param className Optional additional wrapper classes to adjust layout/styling from callers.
+ */
 interface MealFilterSidebarProps {
     onFilterChange: (filter: MealFilter) => void;
     className?: string;
 }
 
+/**
+ * Sidebar for constructing meal queries: fetches sort defaults, user and ingredient options on demand,
+ * lets users tune time, ingredient, rating, and reviewer filters, and emits the current filter when applied.
+ * @param onFilterChange Callback triggered on Apply/Reset to hand the filter back to parent components.
+ * @param className Optional extra classes for sizing or positioning the sidebar.
+ */
 export const MealFilterSidebar: React.FC<MealFilterSidebarProps> = ({
     onFilterChange,
     className
@@ -47,7 +58,7 @@ export const MealFilterSidebar: React.FC<MealFilterSidebarProps> = ({
         const fetchData = async () => {
             try {
                 const filterData = await httpClient
-                    .get<{ users: UserResponse[]; sortParameters: SortParameter[] }>('/api/v1/filters');
+                    .get<{ users: UserResponse[]; sortParameters: SortParameter[] }>("/api/v1/filters");
 
                 setSortParameters(filterData.sortParameters);
                 handleChange("sortBy", filterData.sortParameters[0]?.id);
@@ -58,6 +69,9 @@ export const MealFilterSidebar: React.FC<MealFilterSidebarProps> = ({
         fetchData();
     }, []);
 
+    /**
+     * Fetch users when the search query changes.
+     */
     useEffect(() => {
         const fetchUsers = async () => {
             try {
@@ -71,6 +85,9 @@ export const MealFilterSidebar: React.FC<MealFilterSidebarProps> = ({
         fetchUsers();
     }, [userSearchQuery]);
 
+    /**
+     * Fetch ingredients when the search query changes.
+     */
     useEffect(() => {
         const fetchIngredients = async () => {
             try {
@@ -84,8 +101,11 @@ export const MealFilterSidebar: React.FC<MealFilterSidebarProps> = ({
         fetchIngredients();
     }, [ingredientSearchQuery]);
 
+    /**
+     * Update the local filter state with a single key/value pair; actual emission happens on Apply/Reset.
+     */
     const handleChange = (key: keyof MealFilter, value: any) => {
-        const newFilter = {...filter, [key]: value};
+        const newFilter = { ...filter, [key]: value };
         setFilter(newFilter);
     };
 

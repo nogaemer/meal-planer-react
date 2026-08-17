@@ -9,14 +9,14 @@ import {
     DialogDescription,
     DialogHeader,
     DialogTitle,
-} from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Spinner } from '@/components/ui/spinner';
-import { Badge } from '@/components/ui/badge';
+} from '@/components/ui/dialog.tsx';
+import { Button } from '@/components/ui/button.tsx';
+import { ScrollArea } from '@/components/ui/scroll-area.tsx';
+import { Spinner } from '@/components/ui/spinner.tsx';
+import { Badge } from '@/components/ui/badge.tsx';
 import { Star, Calendar } from 'lucide-react';
-import { historyService } from '@/services/historyService';
-import type { MealCookHistoryDto } from '@/types/history';
+import { historyService } from '@/services/historyService.ts';
+import type { MealCookHistoryDto } from '@/types/history.ts';
 import { format, parseISO, formatDistanceToNow } from 'date-fns';
 
 interface CookHistoryModalProps {

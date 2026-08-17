@@ -1,14 +1,14 @@
 /**
  * Ingredients card component with dynamic portion scaling and fraction/decimal conversion
  */
-import React, {useEffect, useState} from "react";
+import React, {type JSX, useEffect, useState} from "react";
 import {Card} from "@/components/ui/card.tsx";
 import {Separator} from "@/components/ui/separator.tsx";
 import {Button} from "@/components/ui/button.tsx";
 import {Minus, Plus} from "lucide-react";
 import {List, ListItems, ListShape, ListText} from "@/components/ui/list.tsx";
 import {cn} from "@/lib/utils.ts";
-import type {MealIngredient, Meal} from "@/types/meal.ts";
+import type {Meal, MealIngredient} from "@/types/meal.ts";
 import {Skeleton} from "@/components/ui/skeleton.tsx";
 
 // --- Fraction/Decimal conversion utilities ---
@@ -59,7 +59,7 @@ function convertDecimalToFraction(decimal: number): string | number {
  * - Converts to fraction if possible (e.g., 0.5 → ½)
  * - Adjusts decimal places based on integer digits (fewer decimals for larger numbers)
  * - Ensures reasonable precision without excessive digits
- * 
+ *
  * @param {number} num - Number to round
  * @returns {number} Rounded number with appropriate decimal places
  */
@@ -98,95 +98,100 @@ interface IngredientsComponentProps {
 
 /**
  * IngredientsCard - Interactive ingredients list with portion scaling
- * 
+ *
  * Displays meal ingredients with the ability to adjust serving size.
  * Automatically recalculates ingredient amounts based on portion changes,
  * maintaining appropriate precision and fraction display.
- * 
+ *
  * Features:
  * - Dynamic portion adjustment (+/- buttons)
  * - Automatic ingredient amount scaling
  * - Fraction/decimal conversion for readable measurements
  * - Skeleton loading state
- * 
- * @param {Meal|null} meal - Meal object containing ingredients and portion info
- * @param {boolean} loading - Whether to display loading skeleton
- * 
+ *
+ * @param {IngredientsComponentProps} props - Component props
+ * @param {Meal|null} props.meal - Meal object containing ingredients and portion info
+ * @param {boolean} props.loading - Whether to display loading skeleton
+ *
+ * @param className
+ * @param props
  * @returns {JSX.Element} Card with adjustable ingredient list
  */
-const IngredientsCard: React.FC<IngredientsComponentProps & React.HTMLAttributes<HTMLDivElement>> = ({
-    meal,
-    loading,
-    className,
-    ...props
-}) => {
-    const [wantedPortions, setWantedPortions] = useState<number>(meal?.portions ?? 1);
+const IngredientsCard:
+    React.FC<IngredientsComponentProps & React.HTMLAttributes<HTMLDivElement>> =
+    ({
+         meal,
+         loading,
+         className,
+         ...props
+     }: IngredientsComponentProps & React.HTMLAttributes<HTMLDivElement>
+    ): JSX.Element => {
+        const [wantedPortions, setWantedPortions] = useState<number>(meal?.portions ?? 1);
 
-    // Sync portion count with meal data when meal changes
-    useEffect(() => {
-        setWantedPortions(meal?.portions ?? 1);
-    }, [meal]);
+        // Sync portion count with meal data when meal changes
+        useEffect(() => {
+            setWantedPortions(meal?.portions ?? 1);
+        }, [meal]);
 
-    // Recalculate ingredient amounts based on desired portions
-    const updatedIngredients = meal?.ingredients.map(ingredient => {
-        const amount = convertFractionToDecimal(ingredient.amount);
-        let displayAmount = ingredient.amount;
-        // Scale ingredient amount proportionally to portion change
-        if (
-            wantedPortions !== 0 &&
-            wantedPortions &&
-            amount &&
-            typeof amount !== "string"
-        ) {
-            // Calculate: (original amount / original portions) * desired portions
-            const calculatedAmount = roundToTwoDecimalPlaces(
-                (amount as number) / meal.portions * wantedPortions
-            );
-            displayAmount = String(convertDecimalToFraction(calculatedAmount));
-        }
-        return {...ingredient, amount: displayAmount};
-    }) ?? [];
+        // Recalculate ingredient amounts based on desired portions
+        const updatedIngredients = meal?.ingredients.map(ingredient => {
+            const amount = convertFractionToDecimal(ingredient.amount);
+            let displayAmount = ingredient.amount;
+            // Scale ingredient amount proportionally to portion change
+            if (
+                wantedPortions !== 0 &&
+                wantedPortions &&
+                amount &&
+                typeof amount !== "string"
+            ) {
+                // Calculate: (original amount / original portions) * desired portions
+                const calculatedAmount = roundToTwoDecimalPlaces(
+                    (amount as number) / meal.portions * wantedPortions
+                );
+                displayAmount = String(convertDecimalToFraction(calculatedAmount));
+            }
+            return {...ingredient, amount: displayAmount};
+        }) ?? [];
 
-    return (
-        <div className="pb-5 overflow-hidden w-full xl:shrink-0 xl:w-100">
-            <Card className={cn("py-5 px-5 pt-10 mb-5 rounded-4xl", className)} {...props}>
-                <p className="text-foreground font-inter text-2xl font-medium leading-none">
-                    Zutaten
-                </p>
-                <Separator/>
-                {(loading || !meal) ? <IngredientsCardSkeleton/> :
-                    <>
-                        {/* Portion control header with +/- buttons */}
-                        <div className="flex justify-between items-center">
-                            <ListText>{wantedPortions} Portion{wantedPortions > 1 ? "en" : ""}</ListText>
-                            <div className="flex gap-2">
-                                <Button
-                                    variant="outline"
-                                    size="icon"
-                                    className="size-8 text-accent-foreground shadow-none"
-                                    onClick={() => setWantedPortions(Math.max(1, wantedPortions - 1))}
-                                    aria-label="Decrease portions"
-                                >
-                                    <Minus/>
-                                </Button>
-                                <Button
-                                    variant="outline"
-                                    size="icon"
-                                    className="size-8 text-accent-foreground shadow-none"
-                                    onClick={() => setWantedPortions(wantedPortions + 1)}
-                                    aria-label="Increase portions"
-                                >
-                                    <Plus/>
-                                </Button>
+        return (
+            <div className="pb-5 overflow-hidden w-full xl:shrink-0 xl:w-100">
+                <Card className={cn("py-5 px-5 pt-8 mb-5 rounded-3xl", className)} {...props}>
+                    <p className="text-foreground font-inter text-xl font-medium leading-none">
+                        Zutaten
+                    </p>
+                    {(loading || !meal) ? <IngredientsCardSkeleton/> :
+                        <>
+                            {/* Portion control header with +/- buttons */}
+                            <div className="flex justify-between items-center">
+                                <ListText
+                                    className="text-sm font-semibold">{wantedPortions} Portion{wantedPortions > 1 ? "en" : ""}</ListText>
+                                <div className="flex gap-2">
+                                    <Button
+                                        variant="outline"
+                                        size="icon"
+                                        className="size-8 text-accent-foreground shadow-none"
+                                        onClick={() => setWantedPortions(Math.max(1, wantedPortions - 1))}
+                                        aria-label="Decrease portions"
+                                    >
+                                        <Minus/>
+                                    </Button>
+                                    <Button
+                                        variant="outline"
+                                        size="icon"
+                                        className="size-8 text-accent-foreground shadow-none"
+                                        onClick={() => setWantedPortions(wantedPortions + 1)}
+                                        aria-label="Increase portions"
+                                    >
+                                        <Plus/>
+                                    </Button>
+                                </div>
                             </div>
-                        </div>
-                        <Separator/>
-                        <IngredientList ingredients={updatedIngredients}/>
-                    </>}
-            </Card>
-        </div>
-    );
-};
+                            <IngredientList ingredients={updatedIngredients}/>
+                        </>}
+                </Card>
+            </div>
+        );
+    };
 
 /**
  * IngredientsCardSkeleton - Loading placeholder for ingredients card
@@ -232,40 +237,48 @@ interface IngredientListProps {
 
 /**
  * IngredientList - Renders list of ingredients with amounts and units
- * 
+ *
  * Each ingredient displays:
  * - Ingredient name
  * - Amount and unit in a pill-shaped badge
- * 
+ *
  * Applies appropriate border radius to first/last/single items
- * 
+ *
  * @param {MealIngredient[]} ingredients - Array of scaled ingredient objects
  * @returns {JSX.Element} Styled list of ingredient items
  */
-const IngredientList: React.FC<IngredientListProps> = ({ingredients}) => (
-    <List>
-        {ingredients?.map((ingredient, idx, arr) => {
-            // Determine border radius based on position in list
-            let round: "top" | "none" | "all" | "bottom";
-            if (arr.length === 1) round = "all";
-            else if (idx === 0) round = "top";
-            else if (idx === arr.length - 1) round = "bottom";
-            else round = "none";
+const IngredientList: React.FC<IngredientListProps> = ({ ingredients }) => {
+    if (!ingredients || ingredients.length === 0) return <List />;
 
-            return (
-                <ListItems key={ingredient.ingredient.name ?? idx} round={round} className="shrink-0">
-                    <ListText>{ingredient.ingredient.name}</ListText>
-                    {(ingredient.amount || ingredient.unit) && (
-                        <ListShape shape="pill">
-                            <ListText color="white">{ingredient.amount}</ListText>
-                            {(ingredient.amount && ingredient.unit.abbreviation) && <p>{'\u00A0'}</p>}
-                            <ListText color="white">{ingredient.unit.fullName}</ListText>
-                        </ListShape>
-                    )}
-                </ListItems>
-            );
-        })}
-    </List>
-);
+    return (
+        <List>
+            {ingredients.map((ingredient, idx, arr) => {
+                let round: "top" | "none" | "all" | "bottom" = "none";
+                if (arr.length === 1) round = "all";
+                else if (idx === 0) round = "top";
+                else if (idx === arr.length - 1) round = "bottom";
 
+                const hasAmountOrUnit =
+                    Boolean(ingredient.amount) ||
+                    Boolean(ingredient.unit?.abbreviation) ||
+                    Boolean(ingredient.unit?.fullName);
+
+                const key = `${ingredient.ingredient.name ?? "ingredient"}-${idx}`;
+
+                return (
+                    <ListItems key={key} round={round} className="shrink-0">
+                        <ListText>{ingredient.ingredient.name}</ListText>
+                        {hasAmountOrUnit && (
+                            <ListShape shape="pill">
+                                <ListText color="white">{ingredient.amount}</ListText>
+                                {(ingredient.amount && ingredient.unit?.abbreviation) && <p>{'\u00A0'}</p>}
+                                <ListText color="white">{ingredient.unit?.fullName}</ListText>
+                            </ListShape>
+                        )}
+                    </ListItems>
+                );
+            })}
+        </List>
+    );
+};
 export default IngredientsCard;

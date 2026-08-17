@@ -39,7 +39,7 @@ const MealCreatePage = lazy(() => import("@/pages/MealCreatePage.tsx").then(modu
  */
 function App() {
     return (
-        <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
+        <ThemeProvider storageKey="vite-ui-theme">
             <AuthProvider>
                 <BrowserRouter>
                     {/* Show spinner while lazy components load */}

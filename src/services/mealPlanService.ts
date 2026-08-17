@@ -23,8 +23,8 @@ export class MealPlanService {
         mealName: string,
         mealImageUrl: string | null
     ): Promise<DailyMealPlanDto> {
-        return httpClient.post<DailyMealPlanDto>('/api/v1/meal-plan/mark', {
-            mealId,
+        return httpClient.post<DailyMealPlanDto>('/api/v1/meal-plan/today', {
+            mealId: mealId,
             mealName,
             mealImageUrl,
         });
@@ -66,7 +66,7 @@ export class MealPlanService {
      * @returns Updated meal plan entry with completed status
      */
     async completeMealPlan(): Promise<DailyMealPlanDto> {
-        return httpClient.post<DailyMealPlanDto>('/api/v1/meal-plan/complete', {});
+        return httpClient.post<DailyMealPlanDto>('/api/v1/meal-plan/complete-today', {});
     }
 }
 

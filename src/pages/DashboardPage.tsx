@@ -10,8 +10,8 @@ import {httpClient} from "@/services/httpClient.ts";
 import {useNavigate, useSearchParams} from "react-router-dom";
 import MealCard from "@/components/meal/MealCard.tsx";
 import {MealFilterSidebar} from "@/components/meal/MealFilterSidebar.tsx";
-import {TodaysMealWidget} from "@/components/meal/TodaysMealWidget.tsx";
-import {MarkMealDialog} from "@/components/meal/MarkMealDialog.tsx";
+import {TodaysMealWidget} from "@/components/meal/today/TodaysMealWidget.tsx";
+import {MarkMealDialog} from "@/components/meal/today/MarkMealDialog.tsx";
 import {useDailyMealPlan} from "@/hooks/useDailyMealPlan.ts";
 
 /**

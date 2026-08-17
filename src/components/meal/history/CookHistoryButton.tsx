@@ -3,8 +3,8 @@
  * Shows history icon and optional last cooked date.
  */
 import React from 'react';
-import { Button } from '@/components/ui/button';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Button } from '@/components/ui/button.tsx';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip.tsx';
 import { History } from 'lucide-react';
 import { formatDistanceToNow, parseISO } from 'date-fns';
 

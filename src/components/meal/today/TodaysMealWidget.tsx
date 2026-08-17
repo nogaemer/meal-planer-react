@@ -3,13 +3,13 @@
  * Shows planned meal, status, and actions (mark as cooked, change meal).
  */
 import React from 'react';
-import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+import { Card, CardContent } from '@/components/ui/card.tsx';
+import { Button } from '@/components/ui/button.tsx';
+import { Badge } from '@/components/ui/badge.tsx';
 import { CheckCircle2, Calendar, X } from 'lucide-react';
-import type { DailyMealPlanDto } from '@/types/history';
+import type { DailyMealPlanDto } from '@/types/history.ts';
 import { format, parseISO } from 'date-fns';
-import { Skeleton } from '@/components/ui/skeleton';
+import { Skeleton } from '@/components/ui/skeleton.tsx';
 
 interface TodaysMealWidgetProps {
     /** Current meal plan for today (null if none) */

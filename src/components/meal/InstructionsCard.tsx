@@ -1,9 +1,8 @@
 /**
  * Step-by-step cooking instructions card component with numbered steps
  */
-import React from "react";
+import React, {type JSX} from "react";
 import {Card} from "@/components/ui/card.tsx";
-import {Separator} from "@/components/ui/separator.tsx";
 import {List} from "@/components/ui/list.tsx";
 import {cn} from "@/lib/utils.ts";
 import InstructionsNumberBgOval from "@/assets/react/InstructionsNumberBgOval.tsx";
@@ -17,29 +16,28 @@ interface InstructionComponentProps {
 
 /**
  * InstructionCard - Displays numbered cooking instructions
- * 
+ *
  * Shows step-by-step cooking instructions with visual numbered badges.
  * Each step includes an oval-shaped number indicator and instruction text.
- * 
+ *
  * @param {Meal|null} meal - Meal object containing instructions array
  * @param {boolean} loading - Whether to display loading skeleton
- * 
+ *
  * @returns {JSX.Element} Card with numbered instruction steps
  */
 const InstructionCard: React.FC<InstructionComponentProps & React.HTMLProps<HTMLDivElement>> = ({
-    meal,
-    loading,
-    className,
-    ...props
-}) => {
+                                                                                                    meal,
+                                                                                                    loading,
+                                                                                                    className,
+                                                                                                    ...props
+                                                                                                }) => {
 
     return (
-        <Card className={cn("py-5 px-5 pt-10 rounded-4xl", className)} {...props}>
-            <p className="text-foreground font-inter text-2xl font-medium leading-none">
+        <Card className={cn("py-5 px-5 pt-8 rounded-3xl", className)} {...props}>
+            <p className="text-foreground font-inter text-xl font-medium leading-none">
                 Zubereitung
             </p>
-            <Separator/>
-            {(loading || !meal) ? (<InstructionListSkeleton/>) : (<InstructionList instructions={meal.instructions} />)}
+            {(loading || !meal) ? (<InstructionListSkeleton/>) : (<InstructionList instructions={meal.instructions}/>)}
         </Card>
     )
 };
@@ -51,7 +49,7 @@ const InstructionCard: React.FC<InstructionComponentProps & React.HTMLProps<HTML
 const InstructionListSkeleton: React.FC = () => (
     <List className="flex flex-col gap-8">
 
-        {Array.from({ length: 5 }).map((_, idx) => (
+        {Array.from({length: 5}).map((_, idx) => (
             <div className="flex w-full gap-4" key={idx}>
                 {/* Numbered oval badge */}
                 <div className="relative shrink-0 h-16 w-16 justify-center">
@@ -61,9 +59,9 @@ const InstructionListSkeleton: React.FC = () => (
                     </div>
                 </div>
                 <div className="flex flex-col gap-1 w-full">
-                    <Skeleton className="w-full h-5 rounded-md" />
-                    <Skeleton className="w-full h-5 rounded-md" />
-                    <Skeleton className="w-1/4 h-5 rounded-md" />
+                    <Skeleton className="w-full h-5 rounded-md"/>
+                    <Skeleton className="w-full h-5 rounded-md"/>
+                    <Skeleton className="w-1/4 h-5 rounded-md"/>
                 </div>
             </div>
         ))}
@@ -77,15 +75,16 @@ interface InstructionListProps {
 
 /**
  * InstructionList - Renders numbered instruction steps
- * 
+ *
  * Each step displays:
  * - Numbered oval badge (responsive sizing)
  * - Instruction text
- * 
- * @param {string[]} instructions - Array of instruction text strings
+ *
+ * @param {InstructionListProps} props - Component props
+ * @param {string[]} prop.instructions - Array of instruction text strings
  * @returns {JSX.Element} List of numbered instruction steps
  */
-const InstructionList: React.FC<InstructionListProps> = ({instructions}) => (
+const InstructionList: React.FC<InstructionListProps> = ({instructions}:InstructionListProps): JSX.Element => (
     <List className="flex flex-col gap-8">
 
         {instructions?.map((Instruction, idx) => {

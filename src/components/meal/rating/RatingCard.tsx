@@ -4,7 +4,6 @@
 
 import React, {useEffect, useState} from "react";
 import {Card} from "@/components/ui/card.tsx";
-import {Separator} from "@/components/ui/separator.tsx";
 import {List, ListItems, ListShape, ListText} from "@/components/ui/list.tsx";
 import {useAuth} from "@/hooks/useAuth.ts";
 import {httpClient} from "@/services/httpClient.ts";
@@ -20,15 +19,15 @@ interface RatingComponentProps {
 /**
  * Displays meal ratings including average rating and list of user ratings.
  * Authenticated users can submit or update their own rating.
- * 
+ *
  * @param mealId - ID of the meal to display ratings for
  * @returns Card with average rating, user's interactive rating, and list of all ratings
  */
 const RatingCard: React.FC<RatingComponentProps & React.HTMLProps<HTMLDivElement>> = ({
-    mealId,
-    className,
-    ...props
-}) => {
+                                                                                          mealId,
+                                                                                          className,
+                                                                                          ...props
+                                                                                      }) => {
     const {user, isAuthenticated} = useAuth();
     const [ratingsData, setRatingsData] = useState<RatingResponse | null>(null);
     const [userRating, setUserRating] = useState<number>(0);
@@ -45,7 +44,7 @@ const RatingCard: React.FC<RatingComponentProps & React.HTMLProps<HTMLDivElement
 
     /**
      * Fetches ratings from API and initializes user's existing rating if found.
-     * 
+     *
      * @param updateLoading - Whether to show loading state (default: true)
      */
     const fetchRatings = async (updateLoading: boolean = true): Promise<void> => {
@@ -73,7 +72,7 @@ const RatingCard: React.FC<RatingComponentProps & React.HTMLProps<HTMLDivElement
 
     /**
      * Submits a new rating or updates existing rating for the current user.
-     * 
+     *
      * @param newRating - Rating value (1-5)
      */
     const submitRating = async (newRating: number): Promise<void> => {
@@ -106,39 +105,37 @@ const RatingCard: React.FC<RatingComponentProps & React.HTMLProps<HTMLDivElement
     };
 
     return (
-        <Card className={cn("py-5 px-5 pt-10 rounded-4xl w-full xl:shrink-0 xl:w-100 h-fit", className)} {...props}>
+        <Card className={cn("py-5 px-5 pt-8 rounded-3xl w-full xl:shrink-0 xl:w-100 h-fit", className)} {...props}>
             {/* Ratings header */}
             {loading ?
                 <Skeleton className="min-h-6"/>
                 :
-                <p className="text-foreground font-inter text-2xl font-medium leading-none">
+                <p className="text-foreground text-xl font-medium leading-none">
                     Ratings
                 </p>
             }
-            <Separator/>
             {/* Average rating display */}
             {loading ?
-                    <Skeleton className="min-h-14 rounded-2xl"/>
-                    :
-                    <ListItems round="all">
-                        <ListText>Durchschnit</ListText>
-                        <ListShape shape="star">
-                            <ListText color="white">{ratingsData?.mealRating?.toFixed(1)}</ListText>
-                        </ListShape>
-                    </ListItems>
+                <Skeleton className="min-h-14 rounded-2xl"/>
+                :
+                <ListItems round="all">
+                    <ListText>Durchschnit</ListText>
+                    <ListShape shape="star">
+                        <ListText color="white">{ratingsData?.mealRating?.toFixed(1)}</ListText>
+                    </ListShape>
+                </ListItems>
             }
-            <Separator/>
             {/* User rating and list of all ratings */}
             {loading ?
-                    <div className="flex flex-col gap-0.5 overflow-auto">
-                        <Skeleton className="min-h-14 rounded-b-md rounded-t-2xl"/>
-                        <Skeleton className="min-h-14 rounded-md"/>
-                        <Skeleton className="min-h-14 rounded-md"/>
-                        <Skeleton className="min-h-14 rounded-t-md rounded-b-2xl"/>
-                    </div>
-                    :
-                    <RatingList ratings={ratingsData?.ratings} user={user!} existingRatingId={existingRatingId}
-                                userRating={userRating} onSubmit={submitRating}/>
+                <div className="flex flex-col gap-0.5 overflow-auto">
+                    <Skeleton className="min-h-14 rounded-b-md rounded-t-2xl"/>
+                    <Skeleton className="min-h-14 rounded-md"/>
+                    <Skeleton className="min-h-14 rounded-md"/>
+                    <Skeleton className="min-h-14 rounded-t-md rounded-b-2xl"/>
+                </div>
+                :
+                <RatingList ratings={ratingsData?.ratings} user={user!} existingRatingId={existingRatingId}
+                            userRating={userRating} onSubmit={submitRating}/>
             }
         </Card>
     )

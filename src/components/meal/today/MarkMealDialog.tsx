@@ -9,14 +9,14 @@ import {
     DialogDescription,
     DialogHeader,
     DialogTitle,
-} from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Spinner } from '@/components/ui/spinner';
+} from '@/components/ui/dialog.tsx';
+import { Input } from '@/components/ui/input.tsx';
+import { ScrollArea } from '@/components/ui/scroll-area.tsx';
+import { Spinner } from '@/components/ui/spinner.tsx';
 import { Search } from 'lucide-react';
-import { httpClient } from '@/services/httpClient';
-import type { Meal } from '@/types/meal';
-import { formatMinutes } from '@/utils/time';
+import { httpClient } from '@/services/httpClient.ts';
+import type { Meal } from '@/types/meal.ts';
+import { formatMinutes } from '@/utils/time.ts';
 
 interface MarkMealDialogProps {
     /** Whether dialog is open */
@@ -86,7 +86,7 @@ export const MarkMealDialog: React.FC<MarkMealDialogProps> = ({
         if (isOpen) {
             fetchMeals();
         }
-    }, [isOpen, fetchMeals]);
+    }, []);
 
     // Handle search with debouncing
     useEffect(() => {

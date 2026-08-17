@@ -105,6 +105,7 @@ export const MealFormImageContainer = ({images, onChange}: MealFormImageContaine
                                     {images && images.length > 0 ? (
                                         <img
                                             src={images[selectedIndex].srcSetArray[images[selectedIndex].srcSetArray.length - 1]}
+                                            srcSet={images[selectedIndex].srcSetString}
                                             alt={`Bild ${selectedIndex + 1}`}
                                             className="w-full h-64 object-cover"
                                         />

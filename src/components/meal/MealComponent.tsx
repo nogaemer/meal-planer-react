@@ -9,6 +9,7 @@ import RatingCard from "@/components/meal/rating/RatingCard.tsx";
 import type {Meal} from "@/types/meal.ts";
 import InstructionsCard from "@/components/meal/InstructionsCard.tsx";
 import {MealCoverImage} from "@/components/meal/MealCoverImage.tsx";
+import {MealActionBar} from "@/components/meal/MealActionBar.tsx";
 import {httpClient} from "@/services/httpClient.ts";
 import {cn} from "@/lib/utils.ts";
 import {Tabs, TabsContent, TabsList, TabsTrigger} from "@/components/ui/tabs.tsx";
@@ -179,6 +180,9 @@ export const MealComponent: React.FC<MealPageProps & React.HTMLAttributes<HTMLDi
                             priority={priority}
                             onClick={e => e.stopPropagation()}
                         />
+
+                        {!isCard && <MealActionBar meal={meal} loading={isLoading} />}
+
                         {/* Instructions visible on desktop only */}
                         <InstructionsCard meal={meal} loading={isLoading} className="hidden md:flex "/>
                     </div>
